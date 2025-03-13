@@ -22,7 +22,7 @@ const staticProducts: Product[] = [
     handle: '/product-1',
     title: 'Premium Leather Jacket',
     featuredImage: {
-      url: '/images/product-1.jpg'
+      url: '/jacket-1.jpg'
     },
     priceRange: {
       maxVariantPrice: {
@@ -36,7 +36,7 @@ const staticProducts: Product[] = [
     handle: '/product-2',
     title: 'Casual Sneakers',
     featuredImage: {
-      url: '/images/product-2.jpg'
+      url: '/jacket-2.jpg'
     },
     priceRange: {
       maxVariantPrice: {
@@ -50,7 +50,7 @@ const staticProducts: Product[] = [
     handle: '/product-3',
     title: 'Classic Denim Jeans',
     featuredImage: {
-      url: '/images/product-3.jpg'
+      url: '/jacket-3.jpg'
     },
     priceRange: {
       maxVariantPrice: {
