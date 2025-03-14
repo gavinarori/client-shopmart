@@ -10,26 +10,26 @@ export const products = [
         "<p>A luxurious leather jacket made from the finest materials. Perfect for any occasion and built to last.</p>",
       availableForSale: true,
       featuredImage: {
-        url: "/placeholder.svg?height=600&width=600",
+        url: "/assests/featured.png",
         altText: "Premium Leather Jacket",
         width: 600,
         height: 600,
       },
       images: [
         {
-          url: "/placeholder.svg?height=600&width=600",
+          url: "/assests/jacket-1.png",
           altText: "Premium Leather Jacket - Front",
           width: 600,
           height: 600,
         },
         {
-          url: "/placeholder.svg?height=600&width=600&text=Back",
+          url: "/assests/jacket-2.png",
           altText: "Premium Leather Jacket - Back",
           width: 600,
           height: 600,
         },
         {
-          url: "/placeholder.svg?height=600&width=600&text=Side",
+          url: "/assests/jacket-3.png",
           altText: "Premium Leather Jacket - Side",
           width: 600,
           height: 600,
@@ -118,24 +118,30 @@ export const products = [
       descriptionHtml: "<p>Comfortable and stylish sneakers for everyday wear. Available in multiple colors.</p>",
       availableForSale: true,
       featuredImage: {
-        url: "/placeholder.svg?height=600&width=600&text=Sneakers",
+        url: "/assests/cap-1.png",
         altText: "Casual Sneakers",
         width: 600,
         height: 600,
       },
       images: [
         {
-          url: "/placeholder.svg?height=600&width=600&text=Sneakers",
+          url: "/assests/cap-1.png",
           altText: "Casual Sneakers - Front",
           width: 600,
           height: 600,
         },
         {
-          url: "/placeholder.svg?height=600&width=600&text=Sneakers+Side",
+          url: "/assests/cap-2.png",
           altText: "Casual Sneakers - Side",
           width: 600,
           height: 600,
         },
+        {
+            url: "/assests/cap-3.png",
+            altText: "Casual Sneakers - Side",
+            width: 600,
+            height: 600,
+          },
       ],
       priceRange: {
         minVariantPrice: {
@@ -193,20 +199,20 @@ export const products = [
       descriptionHtml: "<p>High-quality denim jeans with a classic fit. Durable and comfortable for everyday wear.</p>",
       availableForSale: true,
       featuredImage: {
-        url: "/placeholder.svg?height=600&width=600&text=Jeans",
+        url: "/assests/washing.png",
         altText: "Classic Denim Jeans",
         width: 600,
         height: 600,
       },
       images: [
         {
-          url: "/placeholder.svg?height=600&width=600&text=Jeans",
+          url: "/assests/washing-1.png",
           altText: "Classic Denim Jeans - Front",
           width: 600,
           height: 600,
         },
         {
-          url: "/placeholder.svg?height=600&width=600&text=Jeans+Back",
+          url: "/assests/washing-2.png",
           altText: "Classic Denim Jeans - Back",
           width: 600,
           height: 600,
@@ -262,7 +268,7 @@ export const products = [
     },
   ]
   
-  export function getProduct(handle: string) {
+  export function getProduct(handle: any) {
     return products.find((product) => product.handle === handle) || null
   }
   

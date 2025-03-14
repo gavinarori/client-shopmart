@@ -6,23 +6,21 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Suspense } from "react"
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { handle: string }
-}) {
-  const product = getProduct(params.handle)
+export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }) {
+  const resolvedParams = await params
+  const product = getProduct(resolvedParams.handle)
 
   if (!product) return notFound()
 
   return {
-    title: product.seo.title || product.title,
-    description: product.seo.description || product.description,
+    title: product.seo?.title || product.title,
+    description: product.seo?.description || product.description,
   }
 }
 
-export default function ProductPage({ params }: { params: { handle: string } }) {
-  const product = getProduct(params.handle)
+export default async function ProductPage({ params }: { params: Promise<{ handle: string }> }) {
+  const resolvedParams = await params
+  const product = getProduct(resolvedParams.handle)
 
   if (!product) return notFound()
 
@@ -86,7 +84,7 @@ function RelatedProducts({ id }: { id: string }) {
             key={product.handle}
             className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
           >
-            <Link className="relative h-full w-full" href={`/${product.handle}`}>
+            <Link className="relative h-full w-full" href={`/product/${product.handle}`}>
               <GridTileImage
                 alt={product.title}
                 label={{
