@@ -7,8 +7,6 @@ import Image from "next/image"
 export function FeatureSection() {
   return (
     <section className="min-h-screen mx-auto  w-full border-b border-neutral-500 rounded-lg">
-
-    
 <div className="relative flex   px-6 py-24 sm:py-32 lg:px-8 ">
 
         <div className="max-w-2xl">
