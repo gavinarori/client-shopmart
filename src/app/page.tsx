@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { ThreeItemGrid } from "@/components/grid/three-items";
 import HeroSlider from "@/components/hero-slider"
+import { FeatureSection } from "@/components/feature-section";
+import { Footer } from "@/components/Footer";
 
 
 export default function Home() {
@@ -16,6 +18,8 @@ export default function Home() {
       </div>
       <ThreeItemGrid />
     </main>
+    <FeatureSection/>
+    <Footer/>
    </>
   );
 }

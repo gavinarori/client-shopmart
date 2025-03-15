@@ -1,17 +1,17 @@
-import LogoSquare from '../../logo-square';
-import Link from 'next/link';
-import { Suspense } from 'react';
-import MobileMenu from './mobile-menu';
-import Search from './search';
-import { Icons } from '@/components/icons';
-import { Button } from '@/components/ui/button';
+import LogoSquare from "../../logo-square"
+import Link from "next/link"
+import MobileMenu from "./mobile-menu"
+import Search from "./search"
+import { Icons } from "@/components/icons"
+import { Button } from "@/components/ui/button"
+import { Palette } from "lucide-react"
 
 const menu = [
-  { title: 'Home', path: '/' },
-  { title: 'Shop', path: '/shop' },
-  { title: 'About', path: '/about' },
-  { title: 'Contact', path: '/contact' },
-];
+  { title: "Home", path: "/" },
+  { title: "Shop", path: "/shop" },
+  { title: "About", path: "/about" },
+  { title: "Contact", path: "/contact" },
+]
 
 export default function Navbar() {
   return (
@@ -23,9 +23,7 @@ export default function Navbar() {
         <div className="flex w-full md:w-1/3">
           <Link href="/" className="mr-2 flex w-full items-center justify-center md:w-auto lg:mr-6">
             <LogoSquare />
-            <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">
-              ShopMart
-            </div>
+            <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">ShopMart</div>
           </Link>
           {menu.length ? (
             <ul className="hidden gap-6 text-sm md:flex md:items-center">
@@ -46,6 +44,12 @@ export default function Navbar() {
           <Search />
         </div>
         <div className="flex justify-end gap-4 md:w-1/3">
+        
+              <Button variant="ghost" size="icon">
+                <Palette className="h-5 w-5" />
+                <span className="sr-only">Customize theme</span>
+              </Button>
+         
           <Button variant="ghost" size="icon">
             <Icons.user className="h-5 w-5" />
             <span className="sr-only">Account</span>
@@ -57,5 +61,6 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
-  );
+  )
 }
+
