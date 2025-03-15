@@ -16,7 +16,7 @@ export default function CategoryGrid() {
         {/* Top Left Section */}
         <div className="relative aspect-[4/3] overflow-hidden group">
           <Image
-            src="https://img.freepik.com/free-photo/portrait-man-with-virtual-reality-headset_23-2148850995.jpg?t=st=1742048137~exp=1742051737~hmac=57d2a740da194b4d439288bbcac2570ba201703203cc3b7170f9941b234d754b&w=996"
+            src="/assests/category-1.jpg"
             alt="Electronics collections"
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -27,7 +27,7 @@ export default function CategoryGrid() {
         {/* Top Right Section */}
         <div className="relative aspect-[4/3] overflow-hidden group">
           <Image
-            src="https://img.freepik.com/free-photo/happy-smiling-couple-just-bought-new-household-appliances-hypermarket_93675-133602.jpg?t=st=1742048264~exp=1742051864~hmac=0d60adf79c96e43ed0674efed265b9395e0fbe6731fbfbb10d0142982e50ec3e&w=996"
+            src="/assests/category-2.jpg"
             alt="Nike Fast Pack"
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -38,7 +38,7 @@ export default function CategoryGrid() {
         {/* Bottom Left Section */}
         <div className="relative aspect-[4/3] overflow-hidden group">
           <Image
-            src="https://img.freepik.com/free-photo/close-up-person-wearing-futuristic-sneakers_23-2151005727.jpg?t=st=1742056452~exp=1742060052~hmac=d4c4ab0366f92dfed253f738f7fe58ec71f6692be88e267b166357e6656b80cc&w=740"
+            src="/assests/category-3.avif"
             alt="Winter Collection"
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -49,7 +49,7 @@ export default function CategoryGrid() {
         {/* Bottom Right Section */}
         <div className="relative aspect-[4/3] overflow-hidden group">
           <Image
-            src="https://img.freepik.com/free-photo/fashion-clothing-hangers-show_1153-5492.jpg?t=st=1742045265~exp=1742048865~hmac=a802ac5c8a8a8cb82c73656227736f41e9a16412875c845747ca04f1f0802955&w=996"
+            src="/assests/category-4.jpg"
             alt="Hoodie Collection"
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
