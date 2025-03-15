@@ -24,7 +24,7 @@ const slides: SlideType[] = [
     subtitle: "Experience our ergonomic furniture collection designed to support your lifestyle and well-being.",
     buttonText: "Shop Now",
     buttonLink: "#",
-    image: "https://img.freepik.com/free-photo/smiley-woman-selling-clothes-front-view_23-2149731135.jpg?t=st=1741944749~exp=1741948349~hmac=880dcf91efb00eefbda5158a6e3d286bf856a2efd6b8208c7adebd2a20797d56&w=996",
+    image: "/assests/slide-1.jpg",
     altText: "Ergonomic furniture collection",
   },
   {
@@ -34,7 +34,7 @@ const slides: SlideType[] = [
       "Our eco-friendly products are made with sustainable materials to help reduce your environmental footprint.",
     buttonText: "Explore",
     buttonLink: "#",
-    image: "https://img.freepik.com/free-photo/close-up-man-shopping-with-laptop_23-2149241375.jpg?t=st=1741944213~exp=1741947813~hmac=16c0b68b82b5713af83f10fe048b3b40a71577fe20189a3b0f6c639c965dc96f&w=996",
+    image: "/assests/slide-2.jpg",
     altText: "Eco-friendly products",
   },
   {
@@ -44,7 +44,7 @@ const slides: SlideType[] = [
       "Don't miss out on exclusive offers across our best-selling products. Shop today and save big on the items you love.",
     buttonText: "Shop Now",
     buttonLink: "#",
-    image: "https://img.freepik.com/free-photo/medium-shot-women-clothes-shopping_23-2150639894.jpg?t=st=1741944281~exp=1741947881~hmac=fdb71ac3a740951c53e51c541c66eac2b90b03f6e49e0fe82711a9154dca9fe4&w=900",
+    image: "/assests/slide-3.jpg",
     altText: "Best-selling products",
   },
 ]
