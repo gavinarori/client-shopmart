@@ -3,12 +3,14 @@ import { ThreeItemGrid } from "@/components/grid/three-items";
 import HeroSlider from "@/components/hero-slider"
 import { FeatureSection } from "@/components/feature-section";
 import { Footer } from "@/components/Footer";
+import CategoryGrid from "@/components/category-grid";
 
 
 export default function Home() {
   return (
    <>
    <HeroSlider/>
+   <CategoryGrid/>
    <main className="min-h-screen ">
       <div className="py-12 text-center">
         <h1 className="text-4xl font-bold mb-4">Featured Products</h1>

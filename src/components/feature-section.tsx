@@ -6,7 +6,7 @@ import Image from "next/image"
 
 export function FeatureSection() {
   return (
-    <section className="min-h-screen mx-auto max-w-screen-xl w-full border-b border-neutral-500 rounded-lg">
+    <section className="min-h-screen mx-auto  w-full border-b border-neutral-500 rounded-lg">
 
     
 <div className="relative flex   px-6 py-24 sm:py-32 lg:px-8 ">
@@ -33,10 +33,10 @@ export function FeatureSection() {
         </div>
       </div>
 
-    <div className="relative flex w-full max-w-5xl ">
+    <div className="relative flex item-center mx-auto w-full max-w-5xl ">
       <div className="relative w-full h-full aspect-[2440/1280]">
         <img 
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full  bg-transparent"
           src="https://once-ui.com/_next/image?url=%2Fimages%2Fmockups%2Fstore-01.png&w=1920&q=75"
           alt="Seamless customization with Once UI"
           loading="lazy"
