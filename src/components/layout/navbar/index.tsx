@@ -4,7 +4,8 @@ import MobileMenu from "./mobile-menu"
 import Search from "./search"
 import { Icons } from "@/components/icons"
 import { Button } from "@/components/ui/button"
-import { Palette } from "lucide-react"
+import { CartCount } from "@/components/cart/cart-count"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const menu = [
   { title: "Home", path: "/" },
@@ -44,20 +45,12 @@ export default function Navbar() {
           <Search />
         </div>
         <div className="flex justify-end gap-4 md:w-1/3">
-        
-              <Button variant="ghost" size="icon">
-                <Palette className="h-5 w-5" />
-                <span className="sr-only">Customize theme</span>
-              </Button>
-         
+          <ThemeToggle />
           <Button variant="ghost" size="icon">
             <Icons.user className="h-5 w-5" />
             <span className="sr-only">Account</span>
           </Button>
-          <Button variant="ghost" size="icon">
-            <Icons.cart className="h-5 w-5" />
-            <span className="sr-only">Cart</span>
-          </Button>
+          <CartCount />
         </div>
       </div>
     </nav>

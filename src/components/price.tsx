@@ -1,24 +1,17 @@
-import clsx from 'clsx';
-
-const Price = ({
-  amount,
-  className,
-  currencyCode = 'USD',
-  currencyCodeClassName
-}: {
-  amount: string;
-  className?: string;
+interface PriceProps {
+  amount: string | number;
   currencyCode: string;
+  className?: string;
   currencyCodeClassName?: string;
-} & React.ComponentProps<'p'>) => (
-  <p suppressHydrationWarning={true} className={className}>
-    {`${new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency: currencyCode,
-      currencyDisplay: 'narrowSymbol'
-    }).format(parseFloat(amount))}`}
-    <span className={clsx('ml-1 inline', currencyCodeClassName)}>{`${currencyCode}`}</span>
-  </p>
-);
+}
+
+const Price = ({ amount, currencyCode, className = '', currencyCodeClassName = '' }: PriceProps) => {
+  return (
+    <div className={`some-default-styles ${className}`}>
+      <span>{amount}</span>
+      <span className={currencyCodeClassName}>{currencyCode}</span>
+    </div>
+  );
+};
 
 export default Price;
