@@ -11,3 +11,22 @@ export function createUrl(pathname: string, params: URLSearchParams) {
 
   return `${pathname}${queryString}`
 }
+
+export function formatPrice(
+  price: number,
+  options: {
+    currency?: "USD" | "EUR" | "GBP" | "BDT" | "KES"
+    notation?: Intl.NumberFormatOptions["notation"]
+  } = {},
+) {
+  const { currency = "KES", notation = "standard" } = options
+
+  const formatter = new Intl.NumberFormat("en-KE", {
+    style: "currency",
+    currency,
+    notation,
+    currencyDisplay: "symbol",
+  })
+
+  return formatter.format(price).replace("KES", "Ksh")
+}

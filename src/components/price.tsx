@@ -1,24 +1,21 @@
-import clsx from 'clsx';
-
-const Price = ({
+export default function Price({
   amount,
-  className,
-  currencyCode = 'USD',
-  currencyCodeClassName
+  currencyCode = "KES",
 }: {
-  amount: string;
-  className?: string;
-  currencyCode: string;
-  currencyCodeClassName?: string;
-} & React.ComponentProps<'p'>) => (
-  <p suppressHydrationWarning={true} className={className}>
-    {`${new Intl.NumberFormat(undefined, {
-      style: 'currency',
+  amount: string | number
+  currencyCode: string
+}) {
+  const formatPrice = (value: string | number) => {
+    const numericPrice = typeof value === "string" ? Number.parseFloat(value) : value
+    return new Intl.NumberFormat("en-KE", {
+      style: "currency",
       currency: currencyCode,
-      currencyDisplay: 'narrowSymbol'
-    }).format(parseFloat(amount))}`}
-    <span className={clsx('ml-1 inline', currencyCodeClassName)}>{`${currencyCode}`}</span>
-  </p>
-);
+      maximumFractionDigits: 2,
+    })
+      .format(numericPrice)
+      .replace("KES", "Ksh")
+  }
 
-export default Price;
+  return <p>{formatPrice(amount)}</p>
+}
+
