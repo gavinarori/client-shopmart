@@ -1,21 +1,17 @@
-export default function Price({
-  amount,
-  currencyCode = "KES",
-}: {
-  amount: string | number
-  currencyCode: string
-}) {
-  const formatPrice = (value: string | number) => {
-    const numericPrice = typeof value === "string" ? Number.parseFloat(value) : value
-    return new Intl.NumberFormat("en-KE", {
-      style: "currency",
-      currency: currencyCode,
-      maximumFractionDigits: 2,
-    })
-      .format(numericPrice)
-      .replace("KES", "Ksh")
-  }
-
-  return <p>{formatPrice(amount)}</p>
+interface PriceProps {
+  amount: string | number;
+  currencyCode: string;
+  className?: string;
+  currencyCodeClassName?: string;
 }
 
+const Price = ({ amount, currencyCode, className = '', currencyCodeClassName = '' }: PriceProps) => {
+  return (
+    <div className={`some-default-styles ${className}`}>
+      <span>{amount}</span>
+      <span className={currencyCodeClassName}>{currencyCode}</span>
+    </div>
+  );
+};
+
+export default Price;
