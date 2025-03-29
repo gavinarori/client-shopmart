@@ -1,222 +1,34 @@
 "use client"
 
 import { useState } from "react"
-import { Filter, ShoppingCart, SlidersHorizontal } from "lucide-react"
 import Image from "next/image"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import Link from "next/link"
+import { ChevronDown, ChevronUp } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Label } from "@/components/ui/label"
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
-import { Slider } from "@/components/ui/slider"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-// Sample product data
-const products = [
-  {
-    id: 1,
-    name: "Premium Wireless Headphones",
-    price: 199.99,
-    rating: 4.8,
-    category: "Audio",
-    brand: "SoundMaster",
-    color: "Black",
-    features: ["Noise Cancellation", "40h Battery", "Bluetooth 5.2"],
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 2,
-    name: 'Ultra HD Smart TV 55"',
-    price: 699.99,
-    rating: 4.6,
-    category: "TV & Home Cinema",
-    brand: "VisionPlus",
-    color: "Black",
-    features: ["4K Resolution", "Smart Assistant", "HDR10+"],
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 3,
-    name: "Professional DSLR Camera",
-    price: 1299.99,
-    rating: 4.9,
-    category: "Cameras",
-    brand: "PhotoPro",
-    color: "Black",
-    features: ["24MP Sensor", "4K Video", "Weather Sealed"],
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 4,
-    name: "Ergonomic Office Chair",
-    price: 249.99,
-    rating: 4.5,
-    category: "Furniture",
-    brand: "ComfortPlus",
-    color: "Gray",
-    features: ["Lumbar Support", "Adjustable Height", "Breathable Mesh"],
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 5,
-    name: "Smart Fitness Watch",
-    price: 149.99,
-    rating: 4.7,
-    category: "Wearables",
-    brand: "FitTech",
-    color: "Blue",
-    features: ["Heart Rate Monitor", "GPS", "5 Day Battery"],
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 6,
-    name: "Portable Bluetooth Speaker",
-    price: 79.99,
-    rating: 4.4,
-    category: "Audio",
-    brand: "SoundMaster",
-    color: "Red",
-    features: ["Waterproof", "12h Battery", "360° Sound"],
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 7,
-    name: 'Gaming Laptop 15.6"',
-    price: 1499.99,
-    rating: 4.8,
-    category: "Computers",
-    brand: "GameForce",
-    color: "Black",
-    features: ["RTX 4070", "16GB RAM", "1TB SSD"],
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 8,
-    name: "Wireless Mechanical Keyboard",
-    price: 129.99,
-    rating: 4.6,
-    category: "Computer Accessories",
-    brand: "TypeMaster",
-    color: "White",
-    features: ["RGB Lighting", "Hot-swappable", "Multi-device"],
-    image: "/placeholder.svg?height=200&width=200",
-  },
-]
+export default function ProductListing() {
+  const [expandedFilters, setExpandedFilters] = useState({
+    brand: true,
+    color: true,
+    size: true,
+    price: false,
+    shipping: false,
+  })
 
-// Get unique categories and brands for filters
-const categories = [...new Set(products.map((product) => product.category))]
-const brands = [...new Set(products.map((product) => product.brand))]
-const colors = [...new Set(products.map((product) => product.color))]
-
-export default function ProductComparison() {
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([])
-  const [filteredProducts, setFilteredProducts] = useState(products)
-  const [priceRange, setPriceRange] = useState([0, 1500])
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [selectedColors, setSelectedColors] = useState<string[]>([])
-  const [sortOption, setSortOption] = useState("featured")
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([])
+  const [compareItems, setCompareItems] = useState<number[]>([])
 
-  // Handle product selection for comparison
-  const toggleProductSelection = (productId: number) => {
-    if (selectedProducts.includes(productId)) {
-      setSelectedProducts(selectedProducts.filter((id) => id !== productId))
-    } else {
-      // Limit to 4 products for comparison
-      if (selectedProducts.length < 4) {
-        setSelectedProducts([...selectedProducts, productId])
-      }
-    }
-  }
-
-  // Apply filters
-  const applyFilters = () => {
-    let result = products
-
-    // Filter by price
-    result = result.filter((product) => product.price >= priceRange[0] && product.price <= priceRange[1])
-
-    // Filter by categories
-    if (selectedCategories.length > 0) {
-      result = result.filter((product) => selectedCategories.includes(product.category))
-    }
-
-    // Filter by brands
-    if (selectedBrands.length > 0) {
-      result = result.filter((product) => selectedBrands.includes(product.brand))
-    }
-
-    // Filter by colors
-    if (selectedColors.length > 0) {
-      result = result.filter((product) => selectedColors.includes(product.color))
-    }
-
-    // Apply sorting
-    result = [...result].sort((a, b) => {
-      switch (sortOption) {
-        case "price-low":
-          return a.price - b.price
-        case "price-high":
-          return b.price - a.price
-        case "rating":
-          return b.rating - a.rating
-        default:
-          return 0
-      }
+  const toggleFilter = (filter: keyof typeof expandedFilters) => {
+    setExpandedFilters({
+      ...expandedFilters,
+      [filter]: !expandedFilters[filter],
     })
-
-    setFilteredProducts(result)
   }
 
-  // Reset filters
-  const resetFilters = () => {
-    setPriceRange([0, 1500])
-    setSelectedCategories([])
-    setSelectedBrands([])
-    setSelectedColors([])
-    setFilteredProducts(products)
-  }
-
-  // Toggle category selection
-  const toggleCategory = (category: string) => {
-    if (selectedCategories.includes(category)) {
-      setSelectedCategories(selectedCategories.filter((c) => c !== category))
-    } else {
-      setSelectedCategories([...selectedCategories, category])
-    }
-  }
-
-  // Toggle brand selection
   const toggleBrand = (brand: string) => {
     if (selectedBrands.includes(brand)) {
       setSelectedBrands(selectedBrands.filter((b) => b !== brand))
@@ -225,7 +37,6 @@ export default function ProductComparison() {
     }
   }
 
-  // Toggle color selection
   const toggleColor = (color: string) => {
     if (selectedColors.includes(color)) {
       setSelectedColors(selectedColors.filter((c) => c !== color))
@@ -234,398 +45,290 @@ export default function ProductComparison() {
     }
   }
 
+  const toggleSize = (size: string) => {
+    if (selectedSizes.includes(size)) {
+      setSelectedSizes(selectedSizes.filter((s) => s !== size))
+    } else {
+      setSelectedSizes([...selectedSizes, size])
+    }
+  }
+
+  const toggleCompare = (id: number) => {
+    if (compareItems.includes(id)) {
+      setCompareItems(compareItems.filter((item) => item !== id))
+    } else {
+      setCompareItems([...compareItems, id])
+    }
+  }
+
+  // Sample product data
+  const products = [
+    {
+      id: 1,
+      name: "Essential T-Shirt Bundle",
+      brand: "Urban Basics",
+      price: 89.99,
+      originalPrice: null,
+      image: "/assests/shoes_1.png",
+    },
+    {
+      id: 2,
+      name: "Classic Denim Jacket",
+      brand: "Vintage Apparel",
+      price: 129.0,
+      originalPrice: null,
+      image: "/assests/shoes_2.png",
+    },
+    {
+      id: 3,
+      name: "Comfort Fit Hoodie",
+      brand: "Urban Basics",
+      price: 65.0,
+      originalPrice: null,
+      image: "/assests/shoes_3.png",
+    },
+    {
+      id: 4,
+      name: "Slim Fit Chinos",
+      brand: "Modern Threads",
+      price: 79.5,
+      originalPrice: 95.0,
+      image: "/assests/shoes_4.png",
+    },
+    {
+      id: 5,
+      name: "Oversized Sweater",
+      brand: "Vintage Apparel",
+      price: 110.0,
+      originalPrice: null,
+      image: "/assests/shoes_5.png",
+    },
+    {
+      id: 6,
+      name: "Linen Button-Up Shirt",
+      brand: "Modern Threads",
+      price: 59.99,
+      originalPrice: 75.0,
+      image: "/assests/shoes_6.png",
+    },
+    {
+      id: 7,
+      name: "Relaxed Fit Jeans",
+      brand: "Vintage Apparel",
+      price: 89.0,
+      originalPrice: null,
+      image: "/assests/shoes_7.png",
+    },
+    {
+      id: 8,
+      name: "Cotton Blend Cardigan",
+      brand: "Urban Basics",
+      price: 69.99,
+      originalPrice: null,
+      image: "/assests/shoes_8.png",
+    },
+  ]
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Shop Products</h1>
-          <p className="text-muted-foreground">Compare and find the perfect product for you</p>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">
+          Shop All <span className="text-muted-foreground">18</span>
+        </h1>
+        <Select defaultValue="featured">
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="featured">Featured Items</SelectItem>
+            <SelectItem value="newest">Newest Arrivals</SelectItem>
+            <SelectItem value="price-low">Price: Low to High</SelectItem>
+            <SelectItem value="price-high">Price: High to Low</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Sidebar Filters */}
+        <div className="w-full md:w-64 shrink-0">
+          {/* Brand Filter */}
+          <div className="mb-6">
+            <div
+              className="flex justify-between items-center cursor-pointer mb-2"
+              onClick={() => toggleFilter("brand")}
+            >
+              <h3 className="font-medium text-sm tracking-wider text-muted-foreground">BRAND</h3>
+              {expandedFilters.brand ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+            {expandedFilters.brand && (
+              <div className="flex flex-wrap gap-2">
+                {["Urban Basics", "Vintage Apparel", "Modern Threads"].map((brand) => (
+                  <Button
+                    key={brand}
+                    variant={selectedBrands.includes(brand) ? "default" : "outline"}
+                    className="rounded-full text-sm py-1 h-auto"
+                    onClick={() => toggleBrand(brand)}
+                  >
+                    {brand}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Color Filter */}
+          <div className="mb-6">
+            <div
+              className="flex justify-between items-center cursor-pointer mb-2"
+              onClick={() => toggleFilter("color")}
+            >
+              <h3 className="font-medium text-sm tracking-wider text-muted-foreground">COLOR</h3>
+              {expandedFilters.color ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+            {expandedFilters.color && (
+              <div className="flex flex-wrap gap-2">
+                {["Black", "White", "Denim", "Beige", "Navy", "Olive", "Burgundy", "Gray", "Khaki"].map((color) => (
+                  <Button
+                    key={color}
+                    variant={selectedColors.includes(color) ? "default" : "outline"}
+                    className="rounded-full text-sm py-1 h-auto"
+                    onClick={() => toggleColor(color)}
+                  >
+                    {color}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Size Filter */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center cursor-pointer mb-2" onClick={() => toggleFilter("size")}>
+              <h3 className="font-medium text-sm tracking-wider text-muted-foreground">SIZE</h3>
+              {expandedFilters.size ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+            {expandedFilters.size && (
+              <div className="flex flex-wrap gap-2">
+                {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
+                  <Button
+                    key={size}
+                    variant={selectedSizes.includes(size) ? "default" : "outline"}
+                    className="rounded-full text-sm py-1 h-auto"
+                    onClick={() => toggleSize(size)}
+                  >
+                    {size}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Price Filter */}
+          <div className="mb-6">
+            <div
+              className="flex justify-between items-center cursor-pointer mb-2"
+              onClick={() => toggleFilter("price")}
+            >
+              <h3 className="font-medium text-sm tracking-wider text-muted-foreground">PRICE</h3>
+              {expandedFilters.price ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+            {expandedFilters.price && (
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="price-under-50" />
+                  <label htmlFor="price-under-50" className="text-sm">
+                    Under $50
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="price-50-100" />
+                  <label htmlFor="price-50-100" className="text-sm">
+                    $50 - $100
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="price-100-150" />
+                  <label htmlFor="price-100-150" className="text-sm">
+                    $100 - $150
+                  </label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="price-over-150" />
+                  <label htmlFor="price-over-150" className="text-sm">
+                    Over $150
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Free Shipping Filter */}
+          <div className="mb-6">
+            <div
+              className="flex justify-between items-center cursor-pointer mb-2"
+              onClick={() => toggleFilter("shipping")}
+            >
+              <h3 className="font-medium text-sm tracking-wider text-muted-foreground">FREE SHIPPING</h3>
+              {expandedFilters.shipping ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+            {expandedFilters.shipping && (
+              <div className="flex items-center space-x-2">
+                <Checkbox id="free-shipping" />
+                <label htmlFor="free-shipping" className="text-sm">
+                  Free Shipping Only
+                </label>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Filter className="h-4 w-4" />
-                Filter
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Filter Products</SheetTitle>
-                <SheetDescription>Narrow down your product search</SheetDescription>
-              </SheetHeader>
-              <div className="py-4">
-                <div className="mb-6">
-                  <h3 className="mb-2 font-medium">Price Range</h3>
-                  <div className="mb-2 flex justify-between">
-                    <span>${priceRange[0]}</span>
-                    <span>${priceRange[1]}</span>
-                  </div>
-                  <Slider
-                    defaultValue={priceRange}
-                    max={1500}
-                    step={10}
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                  />
-                </div>
 
-                <div className="mb-6">
-                  <h3 className="mb-2 font-medium">Categories</h3>
-                  <div className="space-y-2">
-                    {categories.map((category) => (
-                      <div key={category} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`category-${category}`}
-                          checked={selectedCategories.includes(category)}
-                          onCheckedChange={() => toggleCategory(category)}
-                        />
-                        <Label htmlFor={`category-${category}`}>{category}</Label>
-                      </div>
-                    ))}
+        {/* Product Grid */}
+        <div className="flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map((product) => (
+              <div key={product.id} className="group">
+                <Link href={`/product/${product.id}`} className="block mb-3">
+                  <div className="aspect-square bg-[#f5f0e8] rounded-lg overflow-hidden relative">
+                    <Image
+                      src={product.image || "/placeholder.svg"}
+                      alt={product.name}
+                      width={300}
+                      height={300}
+                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                    />
                   </div>
-                </div>
-
-                <div className="mb-6">
-                  <h3 className="mb-2 font-medium">Brands</h3>
-                  <div className="space-y-2">
-                    {brands.map((brand) => (
-                      <div key={brand} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`brand-${brand}`}
-                          checked={selectedBrands.includes(brand)}
-                          onCheckedChange={() => toggleBrand(brand)}
-                        />
-                        <Label htmlFor={`brand-${brand}`}>{brand}</Label>
-                      </div>
-                    ))}
+                </Link>
+                <div>
+                  <h3 className="font-medium">{product.name}</h3>
+                  <p className="text-sm text-muted-foreground">{product.brand}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    {product.originalPrice ? (
+                      <>
+                        <span className="font-medium">${product.price.toFixed(2)}</span>
+                        <span className="text-sm text-muted-foreground line-through">
+                          ${product.originalPrice.toFixed(2)}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="font-medium">${product.price.toFixed(2)}</span>
+                    )}
                   </div>
-                </div>
-
-                <div className="mb-6">
-                  <h3 className="mb-2 font-medium">Colors</h3>
-                  <div className="space-y-2">
-                    {colors.map((color) => (
-                      <div key={color} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`color-${color}`}
-                          checked={selectedColors.includes(color)}
-                          onCheckedChange={() => toggleColor(color)}
-                        />
-                        <Label htmlFor={`color-${color}`}>{color}</Label>
-                      </div>
-                    ))}
+                  <div className="flex items-center mt-2">
+                    <Checkbox
+                      id={`compare-${product.id}`}
+                      checked={compareItems.includes(product.id)}
+                      onCheckedChange={() => toggleCompare(product.id)}
+                    />
+                    <label htmlFor={`compare-${product.id}`} className="ml-2 text-sm">
+                      Compare
+                    </label>
                   </div>
                 </div>
               </div>
-              <SheetFooter>
-                <SheetClose asChild>
-                  <Button variant="outline" onClick={resetFilters}>
-                    Reset
-                  </Button>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Button onClick={applyFilters}>Apply Filters</Button>
-                </SheetClose>
-              </SheetFooter>
-            </SheetContent>
-          </Sheet>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <SlidersHorizontal className="h-4 w-4" />
-                Sort
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSortOption("featured")
-                    applyFilters()
-                  }}
-                >
-                  Featured
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSortOption("price-low")
-                    applyFilters()
-                  }}
-                >
-                  Price: Low to High
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSortOption("price-high")
-                    applyFilters()
-                  }}
-                >
-                  Price: High to Low
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSortOption("rating")
-                    applyFilters()
-                  }}
-                >
-                  Highest Rated
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {selectedProducts.length > 0 && (
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button className="gap-2">Compare ({selectedProducts.length})</Button>
-              </DrawerTrigger>
-              <DrawerContent className="max-h-[90vh]">
-                <DrawerHeader>
-                  <DrawerTitle>Product Comparison</DrawerTitle>
-                  <DrawerDescription>Compare your selected products side by side</DrawerDescription>
-                </DrawerHeader>
-                <div className="overflow-x-auto p-4">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[180px]">Feature</TableHead>
-                        {selectedProducts.map((id) => {
-                          const product = products.find((p) => p.id === id)
-                          return (
-                            <TableHead key={id} className="min-w-[200px] text-center">
-                              <div className="flex flex-col items-center gap-2">
-                                <Image
-                                  src={product?.image || ""}
-                                  alt={product?.name || ""}
-                                  width={100}
-                                  height={100}
-                                  className="rounded-md object-contain"
-                                />
-                                {product?.name}
-                              </div>
-                            </TableHead>
-                          )
-                        })}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">Price</TableCell>
-                        {selectedProducts.map((id) => {
-                          const product = products.find((p) => p.id === id)
-                          return (
-                            <TableCell key={id} className="text-center">
-                              ${product?.price}
-                            </TableCell>
-                          )
-                        })}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Rating</TableCell>
-                        {selectedProducts.map((id) => {
-                          const product = products.find((p) => p.id === id)
-                          return (
-                            <TableCell key={id} className="text-center">
-                              {product?.rating}/5
-                            </TableCell>
-                          )
-                        })}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Category</TableCell>
-                        {selectedProducts.map((id) => {
-                          const product = products.find((p) => p.id === id)
-                          return (
-                            <TableCell key={id} className="text-center">
-                              {product?.category}
-                            </TableCell>
-                          )
-                        })}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Brand</TableCell>
-                        {selectedProducts.map((id) => {
-                          const product = products.find((p) => p.id === id)
-                          return (
-                            <TableCell key={id} className="text-center">
-                              {product?.brand}
-                            </TableCell>
-                          )
-                        })}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Color</TableCell>
-                        {selectedProducts.map((id) => {
-                          const product = products.find((p) => p.id === id)
-                          return (
-                            <TableCell key={id} className="text-center">
-                              {product?.color}
-                            </TableCell>
-                          )
-                        })}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Features</TableCell>
-                        {selectedProducts.map((id) => {
-                          const product = products.find((p) => p.id === id)
-                          return (
-                            <TableCell key={id} className="text-center">
-                              <ul className="list-inside list-disc text-left">
-                                {product?.features.map((feature, index) => (
-                                  <li key={index}>{feature}</li>
-                                ))}
-                              </ul>
-                            </TableCell>
-                          )
-                        })}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Actions</TableCell>
-                        {selectedProducts.map((id) => {
-                          return (
-                            <TableCell key={id} className="text-center">
-                              <Button size="sm" className="gap-2">
-                                <ShoppingCart className="h-4 w-4" />
-                                Add to Cart
-                              </Button>
-                            </TableCell>
-                          )
-                        })}
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-                <DrawerFooter>
-                  <DrawerClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </DrawerClose>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
-          )}
-        </div>
-      </div>
-
-      <Tabs defaultValue="grid" className="mb-8">
-        <TabsList>
-          <TabsTrigger value="grid">Grid View</TabsTrigger>
-          <TabsTrigger value="table">Table View</TabsTrigger>
-        </TabsList>
-        <TabsContent value="grid">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden">
-                <div className="relative">
-                  <Image
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    width={400}
-                    height={400}
-                    className="h-[200px] w-full object-cover"
-                  />
-                  <div className="absolute right-2 top-2">
-                    <Checkbox
-                      checked={selectedProducts.includes(product.id)}
-                      onCheckedChange={() => toggleProductSelection(product.id)}
-                      aria-label={`Select ${product.name} for comparison`}
-                      className="h-5 w-5 rounded-sm border-2 border-white bg-white/20 backdrop-blur-sm"
-                    />
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <div className="mb-2 text-sm text-muted-foreground">{product.category}</div>
-                  <h3 className="mb-1 line-clamp-1 text-lg font-semibold">{product.name}</h3>
-                  <div className="mb-2 flex items-center gap-1">
-                    <span className="text-sm">⭐ {product.rating}/5</span>
-                  </div>
-                  <div className="mb-3 text-lg font-bold">${product.price}</div>
-                  <div className="space-y-1">
-                    {product.features.slice(0, 2).map((feature, index) => (
-                      <div key={index} className="text-sm text-muted-foreground">
-                        • {feature}
-                      </div>
-                    ))}
-                    {product.features.length > 2 && <div className="text-sm text-muted-foreground">• ...</div>}
-                  </div>
-                </CardContent>
-                <CardFooter className="p-4 pt-0">
-                  <Button className="w-full gap-2">
-                    <ShoppingCart className="h-4 w-4" />
-                    Add to Cart
-                  </Button>
-                </CardFooter>
-              </Card>
             ))}
           </div>
-        </TabsContent>
-        <TabsContent value="table">
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]"></TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Brand</TableHead>
-                  <TableHead>Color</TableHead>
-                  <TableHead>Rating</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <Checkbox
-                        checked={selectedProducts.includes(product.id)}
-                        onCheckedChange={() => toggleProductSelection(product.id)}
-                        aria-label={`Select ${product.name} for comparison`}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Image
-                          src={product.image || "/placeholder.svg"}
-                          alt={product.name}
-                          width={50}
-                          height={50}
-                          className="rounded object-cover"
-                        />
-                        <span className="font-medium">{product.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>{product.brand}</TableCell>
-                    <TableCell>{product.color}</TableCell>
-                    <TableCell>⭐ {product.rating}/5</TableCell>
-                    <TableCell className="text-right font-medium">${product.price}</TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" className="gap-2">
-                        <ShoppingCart className="h-4 w-4" />
-                        Add
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {filteredProducts.length === 0 && (
-        <div className="flex h-40 flex-col items-center justify-center rounded-lg border border-dashed">
-          <p className="text-lg font-medium">No products match your filters</p>
-          <Button variant="link" onClick={resetFilters}>
-            Reset all filters
-          </Button>
         </div>
-      )}
+      </div>
     </div>
   )
 }
