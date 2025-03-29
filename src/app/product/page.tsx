@@ -1,9 +1,11 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp, X, ArrowRight } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -57,8 +59,16 @@ export default function ProductListing() {
     if (compareItems.includes(id)) {
       setCompareItems(compareItems.filter((item) => item !== id))
     } else {
-      setCompareItems([...compareItems, id])
+      if (compareItems.length < 4) {
+        // Limit to 4 items for comparison
+        setCompareItems([...compareItems, id])
+      }
     }
+  }
+
+  const removeFromCompare = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setCompareItems(compareItems.filter((item) => item !== id))
   }
 
   // Sample product data
@@ -129,8 +139,11 @@ export default function ProductListing() {
     },
   ]
 
+  // Get the selected products for comparison
+  const selectedProducts = products.filter((product) => compareItems.includes(product.id))
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 pb-24">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">
           Shop All <span className="text-muted-foreground">18</span>
@@ -280,6 +293,19 @@ export default function ProductListing() {
               </div>
             )}
           </div>
+
+          {/* Reset Filters Button */}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              setSelectedBrands([])
+              setSelectedColors([])
+              setSelectedSizes([])
+            }}
+          >
+            Reset filters
+          </Button>
         </div>
 
         {/* Product Grid */}
@@ -288,7 +314,7 @@ export default function ProductListing() {
             {products.map((product) => (
               <div key={product.id} className="group">
                 <Link href={`/product/${product.id}`} className="block mb-3">
-                  <div className="aspect-square bg-[#f5f0e8] rounded-lg overflow-hidden relative">
+                  <div className="aspect-square  rounded-lg overflow-hidden relative">
                     <Image
                       src={product.image || "/placeholder.svg"}
                       alt={product.name}
@@ -329,6 +355,46 @@ export default function ProductListing() {
           </div>
         </div>
       </div>
+
+      {/* Comparison Bar */}
+      {compareItems.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
+          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-4 overflow-x-auto pb-2">
+              {selectedProducts.map((product) => (
+                <div
+                  key={`compare-bar-${product.id}`}
+                  className="flex items-center gap-2 rounded-lg p-2 shrink-0"
+                >
+                  <div className="relative w-12 h-12 bg-[#f5f0e8] rounded overflow-hidden">
+                    <Image
+                      src={product.image || "/placeholder.svg"}
+                      alt={product.name}
+                      width={48}
+                      height={48}
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="max-w-[120px]">
+                    <p className="text-xs font-medium truncate">{product.name}</p>
+                  </div>
+                  <button
+                    onClick={(e) => removeFromCompare(product.id, e)}
+                    className="p-1 hover:bg-gray-200 rounded-full"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <Link href="/compare">
+              <Button className="">
+                Compare <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
