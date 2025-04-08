@@ -62,7 +62,7 @@ interface HomeState {
     topRated_product: Product[]
     discount_product: Product[]
     priceRange: PriceRange
-    product: Product | {}
+    product: Product | null
     relatedProducts: Product[]
     moreProducts: Product[]
     successMessage: string
@@ -88,7 +88,7 @@ const initialState: HomeState = {
         low: 0,
         high: 100
     },
-    product: {},
+    product: null,
     relatedProducts: [],
     moreProducts: [],
     successMessage: '',
@@ -106,7 +106,7 @@ export const get_category = createAsyncThunk(
     'product/get_category',
     async (_, { fulfillWithValue }) => {
         try {
-            const { data } = await api.get('/home/get-categorys')
+            const { data } = await api.get('/home/get-categorys') // Keep this if backend is still using "get-categorys"
             return fulfillWithValue(data)
         } catch (error: any) {
             console.error(error.response)
@@ -224,7 +224,7 @@ export const homeReducer = createSlice({
                 state.discount_product = payload?.discount_product || []
             })
             .addCase(get_product.fulfilled, (state, { payload }: PayloadAction<any>) => {
-                state.product = payload?.product || {}
+                state.product = payload?.product || null
                 state.relatedProducts = payload?.relatedProducts || []
                 state.moreProducts = payload?.moreProducts || []
             })
