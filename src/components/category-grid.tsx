@@ -1,7 +1,35 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useDispatch, useSelector } from "react-redux"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "./skeleton"
+import { get_category } from "@/store/reducers/homeReducer"
 
 export default function CategoryGrid() {
+  const dispatch = useDispatch<any>()
+  const router = useRouter()
+  const { categories } = useSelector((state: any) => state.home)
+  const [loading, setLoading] = useState(true)
+  const [visibleCount, setVisibleCount] = useState(4)
+
+  useEffect(() => {
+    dispatch(get_category()).then(() => setLoading(false))
+  }, [dispatch])
+
+  const handleClick = (categoryName: string) => {
+    router.push(`/products?category=${encodeURIComponent(categoryName)}`)
+  }
+
+  const handleShowMore = () => {
+    setVisibleCount((prevCount) => prevCount + 4)
+  }
+
+  const visibleCategories = categories?.slice(0, visibleCount) || []
+  const hasMoreCategories = categories?.length > visibleCount
+
   return (
     <div>
       <div className="py-12 text-center">
@@ -12,72 +40,60 @@ export default function CategoryGrid() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 w-full py-4 ">
-      
-        {/* Top Left Section */}
-        <div className="relative aspect-[4/3] overflow-hidden group">
-          <Image
-            src="/assests/category-1.jpg"
-            alt="Electronics collections"
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-           <Overlay title="Electronics Collection" subtitle="Explore the Latest Tech" />
-        </div>
-
-        {/* Top Right Section */}
-        <div className="relative aspect-[4/3] overflow-hidden group">
-          <Image
-            src="/assests/category-2.jpg"
-            alt="Nike Fast Pack"
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-         <Overlay title="Home Appliances" subtitle="Upgrade Your Living Space" />
-        </div>
-
-        {/* Bottom Left Section */}
-        <div className="relative aspect-[4/3] overflow-hidden group">
-          <Image
-            src="/assests/category-3.avif"
-            alt="Winter Collection"
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          <Overlay title="Shoes Collection" subtitle="Step Into Style & Comfort" />
-        </div>
-
-        {/* Bottom Right Section */}
-        <div className="relative aspect-[4/3] overflow-hidden group">
-          <Image
-            src="/assests/category-4.jpg"
-            alt="Hoodie Collection"
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          <Overlay title="Clothing Collection" subtitle="Fashion for Every Season" />
-        </div>
-
+        {loading
+          ? Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="relative aspect-[4/3]">
+                <Skeleton className="absolute inset-0 rounded-none" />
+                <div className="absolute bottom-6 left-6 z-10">
+                  <Skeleton className="h-4 w-32 mb-1" />
+                  <Skeleton className="h-7 w-48 mb-2" />
+                  <Skeleton className="h-10 w-20" />
+                </div>
+              </div>
+            ))
+          : visibleCategories.map((category: any) => (
+              <div
+                key={category._id}
+                className="relative aspect-[4/3] overflow-hidden group cursor-pointer"
+                onClick={() => handleClick(category.name)}
+              >
+                <Image
+                  src={category.image || "/placeholder.svg"}
+                  alt={category.name}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <Overlay title={category.name} subtitle={`Shop the best in ${category.name}`} />
+              </div>
+            ))}
       </div>
+
+      {!loading && hasMoreCategories && (
+        <div className="flex justify-center mt-8 mb-12">
+          <Button onClick={handleShowMore} variant="outline" size="lg">
+            Show More Categories
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
 
-
 type OverlayProps = {
-  title: string;
-  subtitle: string;
-};
+  title: string
+  subtitle: string
+}
 
 function Overlay({ title, subtitle }: OverlayProps) {
   return (
     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
-      <div className="absolute bottom-8 left-8 text-white">
-        <p className="text-sm mb-2">{subtitle}</p>
-        <h2 className="text-3xl font-bold mb-4">{title}</h2>
+      <div className="absolute bottom-6 left-6 text-white">
+        <p className="text-sm mb-1">{subtitle}</p>
+        <h2 className="text-2xl font-semibold mb-2">{title}</h2>
         <Button variant="secondary" className="bg-white text-black hover:bg-white/90">
           Shop
         </Button>
       </div>
     </div>
-  );
+  )
 }

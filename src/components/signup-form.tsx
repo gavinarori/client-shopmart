@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Check, Eye, EyeOff, X } from "lucide-react";
 import React, { useState, useEffect, useMemo } from "react";
-import toast from 'react-hot-toast'
+import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-
-;
+import { useSelector, useDispatch } from "react-redux";
+import { customer_register, messageClear } from "../store/reducers/authReducer";
 
 interface SignUpState {
   name: string;
@@ -21,9 +21,11 @@ export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"form">) {
-
   const router = useRouter();
-
+  const dispatch = useDispatch<any>();
+  const { loader, successMessage, errorMessage } = useSelector(
+    (state: any) => state.auth
+  );
 
   const [state, setState] = useState<SignUpState>({
     name: "",
@@ -33,21 +35,33 @@ export function SignUpForm({
 
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
-
-
-
   const inputHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setState({ ...state, [e.target.name]: e.target.value });
   };
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!state.name || !state.email || !state.password) {
       toast.error("All fields are required!");
       return;
     }
-   
+
+    dispatch(customer_register(state));
   };
+
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+      router.push("/login");
+    }
+
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+  }, [successMessage, errorMessage, dispatch, router]);
 
   const toggleVisibility = () => setIsVisible((prevState) => !prevState);
 
@@ -65,7 +79,10 @@ export function SignUpForm({
   };
 
   const strength = checkStrength(state.password);
-  const strengthScore = useMemo(() => strength.filter((req) => req.met).length, [strength]);
+  const strengthScore = useMemo(
+    () => strength.filter((req) => req.met).length,
+    [strength]
+  );
 
   const getStrengthColor = (score: number) => {
     if (score === 0) return "bg-border";
@@ -83,7 +100,11 @@ export function SignUpForm({
   };
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={submit}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+      onSubmit={submit}
+    >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Create account</h1>
         <p className="text-sm text-muted-foreground">
@@ -153,7 +174,9 @@ export function SignUpForm({
           aria-valuemax={4}
         >
           <div
-            className={`h-full ${getStrengthColor(strengthScore)} transition-all duration-500`}
+            className={`h-full ${getStrengthColor(
+              strengthScore
+            )} transition-all duration-500`}
             style={{ width: `${(strengthScore / 4) * 100}%` }}
           />
         </div>
@@ -170,13 +193,17 @@ export function SignUpForm({
               ) : (
                 <X size={16} className="text-muted-foreground/80" />
               )}
-              <span className={req.met ? "text-emerald-600" : "text-muted-foreground"}>{req.text}</span>
+              <span
+                className={req.met ? "text-emerald-600" : "text-muted-foreground"}
+              >
+                {req.text}
+              </span>
             </li>
           ))}
         </ul>
 
-        <Button type="submit" className="w-full">
-          { "Sign up"}
+        <Button type="submit" className="w-full" disabled={loader}>
+          {loader ? "Signing up..." : "Sign up"}
         </Button>
       </div>
 
