@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Send, Paperclip, MoreVertical, Phone, Video, ShoppingBag } from "lucide-react"
 
 
-// Mock data for conversations
+
 const conversations = [
   {
     id: "1",
