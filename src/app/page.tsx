@@ -1,12 +1,18 @@
+"use client"
+
 import Image from "next/image";
+import { useEffect } from 'react'
 import { ThreeItemGrid } from "@/components/grid/three-items";
 import HeroSlider from "@/components/hero-slider"
 import { FeatureSection } from "@/components/feature-section";
 import { Footer } from "@/components/Footer";
 import CategoryGrid from "@/components/category-grid";
+import { useDispatch } from 'react-redux';
+
 
 
 export default function Home() {
+
   return (
    <>
    <HeroSlider/>
