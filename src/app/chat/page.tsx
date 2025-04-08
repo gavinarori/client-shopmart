@@ -219,8 +219,8 @@ export default function ChatPage() {
                 .map((conversation) => (
                   <div
                     key={conversation.id}
-                    className={`flex items-center gap-3 rounded-lg p-3 cursor-pointer hover:bg-gray-100 ${
-                      activeConversation.id === conversation.id ? "bg-gray-100" : ""
+                    className={`flex items-center gap-3 rounded-lg p-3 cursor-pointer  ${
+                      activeConversation.id === conversation.id ? "bg-blue-500" : ""
                     }`}
                     onClick={() => setActiveConversation(conversation)}
                   >
@@ -258,8 +258,8 @@ export default function ChatPage() {
                 .map((conversation) => (
                   <div
                     key={conversation.id}
-                    className={`flex items-center gap-3 rounded-lg p-3 cursor-pointer hover:bg-gray-100 ${
-                      activeConversation.id === conversation.id ? "bg-gray-100" : ""
+                    className={`flex items-center gap-3 rounded-lg p-3 cursor-pointer  ${
+                      activeConversation.id === conversation.id ? "bg-blue-500" : ""
                     }`}
                     onClick={() => setActiveConversation(conversation)}
                   >
