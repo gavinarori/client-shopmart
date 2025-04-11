@@ -2,15 +2,30 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { ChevronDown, ChevronUp, X, ArrowRight } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useDispatch, useSelector } from "react-redux"
+import { price_range_product, query_products } from "@/store/reducers/homeReducer"
 
 export default function ProductListing() {
+  const { products, totalProduct, priceRange, parPage, loading } = useSelector((state: any) => state.home)
+  const searchParams = useSearchParams()
+  const category = searchParams.get("category")
+
+  const [pageNumber, setPageNumber] = useState(1)
+  const [styles, setStyles] = useState("grid")
+  const [filter, setFilter] = useState(true)
+  const [state, setState] = useState({ values: [0, 1000] }) // Default values before priceRange is loaded
+  const [rating, setRatingQ] = useState("")
+  const [sortPrice, setSortPrice] = useState("")
+
+  const dispatch = useDispatch<any>()
   const [expandedFilters, setExpandedFilters] = useState({
     brand: true,
     color: true,
@@ -18,6 +33,51 @@ export default function ProductListing() {
     price: false,
     shipping: false,
   })
+
+  useEffect(() => {
+    dispatch(price_range_product())
+  }, [dispatch])
+
+  useEffect(() => {
+    if (priceRange && priceRange.high !== undefined && priceRange.low !== undefined) {
+      if (priceRange.high <= priceRange.low) {
+        setState({
+          values: [priceRange.low, priceRange.low + 1],
+        })
+      } else {
+        setState({
+          values: [priceRange.low, priceRange.high],
+        })
+      }
+    }
+  }, [priceRange])
+
+  useEffect(() => {
+    dispatch(
+      query_products({
+        low: state.values[0] || "",
+        high: state.values[1] || "",
+        category,
+        rating,
+        sortPrice,
+        pageNumber,
+      } as any),
+    )
+  }, [state.values[0], state.values[1], category, rating, pageNumber, sortPrice, dispatch])
+
+  const resetRating = () => {
+    setRatingQ("")
+    dispatch(
+      query_products({
+        low: state.values[0],
+        high: state.values[1],
+        category,
+        rating: "",
+        sortPrice,
+        pageNumber,
+      } as any),
+    )
+  }
 
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [selectedColors, setSelectedColors] = useState<string[]>([])
@@ -71,84 +131,43 @@ export default function ProductListing() {
     setCompareItems(compareItems.filter((item) => item !== id))
   }
 
-  // Sample product data
-  const products = [
-    {
-      id: 1,
-      name: "Essential T-Shirt Bundle",
-      brand: "Urban Basics",
-      price: 89.99,
-      originalPrice: null,
-      image: "/assests/shoes_1.png",
-    },
-    {
-      id: 2,
-      name: "Classic Denim Jacket",
-      brand: "Vintage Apparel",
-      price: 129.0,
-      originalPrice: null,
-      image: "/assests/shoes_2.png",
-    },
-    {
-      id: 3,
-      name: "Comfort Fit Hoodie",
-      brand: "Urban Basics",
-      price: 65.0,
-      originalPrice: null,
-      image: "/assests/shoes_3.png",
-    },
-    {
-      id: 4,
-      name: "Slim Fit Chinos",
-      brand: "Modern Threads",
-      price: 79.5,
-      originalPrice: 95.0,
-      image: "/assests/shoes_4.png",
-    },
-    {
-      id: 5,
-      name: "Oversized Sweater",
-      brand: "Vintage Apparel",
-      price: 110.0,
-      originalPrice: null,
-      image: "/assests/shoes_5.png",
-    },
-    {
-      id: 6,
-      name: "Linen Button-Up Shirt",
-      brand: "Modern Threads",
-      price: 59.99,
-      originalPrice: 75.0,
-      image: "/assests/shoes_6.png",
-    },
-    {
-      id: 7,
-      name: "Relaxed Fit Jeans",
-      brand: "Vintage Apparel",
-      price: 89.0,
-      originalPrice: null,
-      image: "/assests/shoes_7.png",
-    },
-    {
-      id: 8,
-      name: "Cotton Blend Cardigan",
-      brand: "Urban Basics",
-      price: 69.99,
-      originalPrice: null,
-      image: "/assests/shoes_8.png",
-    },
-  ]
-
   // Get the selected products for comparison
-  const selectedProducts = products.filter((product) => compareItems.includes(product.id))
+  const selectedProducts = products.filter((product: any) => compareItems.includes(product.id))
+
+  const handleSortChange = (value: string) => {
+    if (value === "price-low") {
+      setSortPrice("low")
+    } else if (value === "price-high") {
+      setSortPrice("high")
+    } else {
+      setSortPrice("")
+    }
+  }
+
+  const resetFilters = () => {
+    setSelectedBrands([])
+    setSelectedColors([])
+    setSelectedSizes([])
+    setState({ values: [priceRange.low, priceRange.high] })
+    setRatingQ("")
+    setSortPrice("")
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 pb-24">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">
-          Shop All <span className="text-muted-foreground">18</span>
+          {category ? (
+            <>
+              {category} <span className="text-muted-foreground">({totalProduct || 0})</span>
+            </>
+          ) : (
+            <>
+              Shop All <span className="text-muted-foreground">({totalProduct || 0})</span>
+            </>
+          )}
         </h1>
-        <Select defaultValue="featured">
+        <Select defaultValue="featured" onValueChange={handleSortChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -248,25 +267,41 @@ export default function ProductListing() {
             {expandedFilters.price && (
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="price-under-50" />
+                  <Checkbox
+                    id="price-under-50"
+                    checked={state.values[0] === 0 && state.values[1] === 50}
+                    onCheckedChange={() => setState({ values: [0, 50] })}
+                  />
                   <label htmlFor="price-under-50" className="text-sm">
                     Under $50
                   </label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="price-50-100" />
+                  <Checkbox
+                    id="price-50-100"
+                    checked={state.values[0] === 50 && state.values[1] === 100}
+                    onCheckedChange={() => setState({ values: [50, 100] })}
+                  />
                   <label htmlFor="price-50-100" className="text-sm">
                     $50 - $100
                   </label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="price-100-150" />
+                  <Checkbox
+                    id="price-100-150"
+                    checked={state.values[0] === 100 && state.values[1] === 150}
+                    onCheckedChange={() => setState({ values: [100, 150] })}
+                  />
                   <label htmlFor="price-100-150" className="text-sm">
                     $100 - $150
                   </label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="price-over-150" />
+                  <Checkbox
+                    id="price-over-150"
+                    checked={state.values[0] === 150 && state.values[1] === (priceRange?.high || 1000)}
+                    onCheckedChange={() => setState({ values: [150, priceRange?.high || 1000] })}
+                  />
                   <label htmlFor="price-over-150" className="text-sm">
                     Over $150
                   </label>
@@ -295,64 +330,91 @@ export default function ProductListing() {
           </div>
 
           {/* Reset Filters Button */}
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              setSelectedBrands([])
-              setSelectedColors([])
-              setSelectedSizes([])
-            }}
-          >
+          <Button variant="outline" className="w-full" onClick={resetFilters}>
             Reset filters
           </Button>
         </div>
 
         {/* Product Grid */}
         <div className="flex-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <div key={product.id} className="group">
-                <Link href={`/product/${product.id}`} className="block mb-3">
-                  <div className="aspect-square  rounded-lg overflow-hidden relative">
-                    <Image
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.name}
-                      width={300}
-                      height={300}
-                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                </Link>
-                <div>
-                  <h3 className="font-medium">{product.name}</h3>
-                  <p className="text-sm text-muted-foreground">{product.brand}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    {product.originalPrice ? (
-                      <>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={index} className="space-y-3">
+                  <div className="aspect-square bg-muted rounded-lg animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                  <div className="h-4 w-2/3 bg-muted rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          ) : products && products.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map((product: any) => (
+                <div key={product.id} className="group">
+                  <Link href={`/product/${product.id}`} className="block mb-3">
+                    <div className="aspect-square rounded-lg overflow-hidden relative">
+                      <Image
+                        src={product.image || "/placeholder.svg?height=300&width=300"}
+                        alt={product.name}
+                        width={300}
+                        height={300}
+                        className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  </Link>
+                  <div>
+                    <h3 className="font-medium">{product.name}</h3>
+                    <p className="text-sm text-muted-foreground">{product.brand}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {product.originalPrice ? (
+                        <>
+                          <span className="font-medium">${product.price.toFixed(2)}</span>
+                          <span className="text-sm text-muted-foreground line-through">
+                            ${product.originalPrice.toFixed(2)}
+                          </span>
+                        </>
+                      ) : (
                         <span className="font-medium">${product.price.toFixed(2)}</span>
-                        <span className="text-sm text-muted-foreground line-through">
-                          ${product.originalPrice.toFixed(2)}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="font-medium">${product.price.toFixed(2)}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center mt-2">
-                    <Checkbox
-                      id={`compare-${product.id}`}
-                      checked={compareItems.includes(product.id)}
-                      onCheckedChange={() => toggleCompare(product.id)}
-                    />
-                    <label htmlFor={`compare-${product.id}`} className="ml-2 text-sm">
-                      Compare
-                    </label>
+                      )}
+                    </div>
+                    <div className="flex items-center mt-2">
+                      <Checkbox
+                        id={`compare-${product.id}`}
+                        checked={compareItems.includes(product.id)}
+                        onCheckedChange={() => toggleCompare(product.id)}
+                      />
+                      <label htmlFor={`compare-${product.id}`} className="ml-2 text-sm">
+                        Compare
+                      </label>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12">
+              <p className="text-lg text-muted-foreground mb-4">No products found</p>
+              <Button onClick={resetFilters}>Clear filters</Button>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalProduct > parPage && (
+            <div className="flex justify-center mt-8">
+              <div className="flex gap-2">
+                {[...Array(Math.ceil(totalProduct / parPage))].map((_, i) => (
+                  <Button
+                    key={i}
+                    variant={pageNumber === i + 1 ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPageNumber(i + 1)}
+                  >
+                    {i + 1}
+                  </Button>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -361,14 +423,11 @@ export default function ProductListing() {
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
           <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-4 overflow-x-auto pb-2">
-              {selectedProducts.map((product) => (
-                <div
-                  key={`compare-bar-${product.id}`}
-                  className="flex items-center gap-2 rounded-lg p-2 shrink-0"
-                >
+              {selectedProducts.map((product: any) => (
+                <div key={`compare-bar-${product.id}`} className="flex items-center gap-2 rounded-lg p-2 shrink-0">
                   <div className="relative w-12 h-12 bg-[#f5f0e8] rounded overflow-hidden">
                     <Image
-                      src={product.image || "/placeholder.svg"}
+                      src={product.image || "/placeholder.svg?height=48&width=48"}
                       alt={product.name}
                       width={48}
                       height={48}
@@ -398,4 +457,3 @@ export default function ProductListing() {
     </div>
   )
 }
-

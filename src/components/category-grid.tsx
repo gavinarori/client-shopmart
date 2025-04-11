@@ -40,32 +40,38 @@ export default function CategoryGrid() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 w-full py-4 ">
-        {loading
-          ? Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="relative aspect-[4/3]">
-                <Skeleton className="absolute inset-0 rounded-none" />
-                <div className="absolute bottom-6 left-6 z-10">
-                  <Skeleton className="h-4 w-32 mb-1" />
-                  <Skeleton className="h-7 w-48 mb-2" />
-                  <Skeleton className="h-10 w-20" />
-                </div>
+        {loading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="relative aspect-[4/3]">
+              <Skeleton className="absolute inset-0 rounded-none" />
+              <div className="absolute bottom-6 left-6 z-10">
+                <Skeleton className="h-4 w-32 mb-1" />
+                <Skeleton className="h-7 w-48 mb-2" />
+                <Skeleton className="h-10 w-20" />
               </div>
-            ))
-          : visibleCategories.map((category: any) => (
-              <div
-                key={category._id}
-                className="relative aspect-[4/3] overflow-hidden group cursor-pointer"
-                onClick={() => handleClick(category.name)}
-              >
-                <Image
-                  src={category.image || "/placeholder.svg"}
-                  alt={category.name}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <Overlay title={category.name} subtitle={`Shop the best in ${category.name}`} />
-              </div>
-            ))}
+            </div>
+          ))
+        ) : visibleCategories.length > 0 ? (
+          visibleCategories.map((category: any) => (
+            <div
+              key={category._id}
+              className="relative aspect-[4/3] overflow-hidden group cursor-pointer"
+              onClick={() => handleClick(category.name)}
+            >
+              <Image
+                src={category.image || "/placeholder.svg"}
+                alt={category.name}
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <Overlay title={category.name} subtitle={`Shop the best in ${category.name}`} />
+            </div>
+          ))
+        ) : (
+          <div className="col-span-2 text-center py-12">
+            <p>No categories found. Please check your data.</p>
+          </div>
+        )}
       </div>
 
       {!loading && hasMoreCategories && (
