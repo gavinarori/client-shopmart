@@ -1,129 +1,159 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
-import { ChevronLeft, ChevronRight, Star } from "lucide-react"
+import Link from "next/link"
+import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useSelector } from "react-redux"
 
 export default function ComparePage() {
-  // This would typically come from a URL parameter or state management
-  // For demo purposes, we're using static data
-  const [compareItems] = useState([1, 2, 3])
+  const [compareItems, setCompareItems] = useState<number[]>([])
+  const { products } = useSelector((state: any) => state.home)
+  const [compareProducts, setCompareProducts] = useState<any[]>([])
 
-  // Sample product data - in a real app, you'd fetch this based on compareItems
-  const products = [
-    {
-      id: 1,
-      name: "Essential T-Shirt Bundle",
-      brand: "Urban Basics",
-      price: 89.99,
-      rating: 4.5,
-      ratingCount: 42,
-      description:
-        "A collection of premium cotton t-shirts in essential colors. Perfect for everyday wear with a comfortable fit and durable fabric that maintains its shape after washing.",
-      image: "/placeholder.svg",
-    },
-    {
-      id: 2,
-      name: "Classic Denim Jacket",
-      brand: "Vintage Apparel",
-      price: 129.0,
-      rating: 0,
-      ratingCount: 0,
-      description:
-        "Bring timeless style to your wardrobe with this classic denim jacket. Features a comfortable fit with just the right amount of stretch for everyday wear.",
-      image: "/placeholder.svg",
-    },
-    {
-      id: 3,
-      name: "Comfort Fit Hoodie",
-      brand: "Urban Basics",
-      price: 65.0,
-      rating: 0,
-      ratingCount: 0,
-      description:
-        "Stay cozy with this ultra-soft hoodie. Made from a premium cotton blend that provides warmth without weight, perfect for layering in any season.",
-      image: "/placeholder.svg",
-    },
-  ]
+  // Load compare items from localStorage on client side
+  useEffect(() => {
+    const storedItems = localStorage.getItem("compareItems")
+    if (storedItems) {
+      setCompareItems(JSON.parse(storedItems))
+    }
+  }, [])
 
-  // Get the selected products for comparison
-  const selectedProducts = products.filter((product) => compareItems.includes(product.id))
+  // Update compareProducts when products or compareItems change
+  useEffect(() => {
+    if (products && products.length > 0 && compareItems.length > 0) {
+      const filtered = products.filter((product: any) => compareItems.includes(product.id))
+      setCompareProducts(filtered)
+    }
+  }, [products, compareItems])
+
+  // Get all unique features from all products
+  const allFeatures = compareProducts.reduce((acc: string[], product: any) => {
+    if (product.features) {
+      product.features.forEach((feature: string) => {
+        if (!acc.includes(feature)) {
+          acc.push(feature)
+        }
+      })
+    }
+    return acc
+  }, [])
+
+  if (compareProducts.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-12 flex flex-col items-center justify-center">
+        <h1 className="text-3xl font-bold mb-4">Compare Products</h1>
+        <p className="text-muted-foreground mb-6">No products selected for comparison</p>
+        <Link href="/product-listing">
+          <Button>
+            <ChevronLeft className="mr-2 h-4 w-4" /> Back to Shopping
+          </Button>
+        </Link>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">
-          Compare products <span className="text-muted-foreground">{selectedProducts.length}</span>
-        </h1>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon">
-            <ChevronLeft className="h-4 w-4" />
+      <div className="flex items-center mb-8">
+        <Link href="/product-listing">
+          <Button variant="outline" size="sm">
+            <ChevronLeft className="mr-2 h-4 w-4" /> Back to Shopping
           </Button>
-          <Button variant="outline" size="icon">
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+        </Link>
+        <h1 className="text-3xl font-bold ml-4">Compare Products</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {selectedProducts.map((product) => (
-          <div key={product.id} className="flex flex-col">
-            <div className="aspect-square bg-[#f5f0e8] rounded-lg overflow-hidden mb-4">
-              <Image
-                src={product.image || "/placeholder.svg"}
-                alt={product.name}
-                width={400}
-                height={400}
-                className="object-cover w-full h-full"
-              />
-            </div>
-            <h2 className="text-lg font-semibold">{product.name}</h2>
-            <p className="text-sm text-muted-foreground mb-1">{product.brand}</p>
-            <p className="font-medium mb-4">${product.price.toFixed(2)}</p>
-
-            {product.id === 1 ? (
-              <Button className="mb-4">View options</Button>
-            ) : product.id === 2 ? (
-              <Button className="mb-4 bg-lime-400 hover:bg-lime-500 text-black">Add to cart</Button>
-            ) : (
-              <Button className="mb-4">View options</Button>
-            )}
-
-            <div className="mb-4">
-              <h3 className="text-xs uppercase text-muted-foreground mb-1">RATING</h3>
-              <div className="flex items-center">
-                {product.rating > 0 ? (
-                  <>
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${i < Math.floor(product.rating) ? "fill-black" : "fill-muted stroke-muted-foreground"}`}
-                        />
-                      ))}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="text-left p-4 border-b w-1/4">Product</th>
+              {compareProducts.map((product) => (
+                <th key={`header-${product.id}`} className="p-4 border-b">
+                  <div className="flex flex-col items-center">
+                    <div className="aspect-square w-32 h-32 relative mb-2">
+                      <Image
+                        src={product.image || "/placeholder.svg?height=128&width=128"}
+                        alt={product.name}
+                        fill
+                        className="object-cover rounded-md"
+                      />
                     </div>
-                    <span className="ml-2 text-sm">{product.rating}</span>
-                  </>
-                ) : (
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-muted stroke-muted-foreground" />
-                    ))}
-                    <span className="ml-2 text-sm">0</span>
+                    <h3 className="font-medium text-center">{product.name}</h3>
+                    <p className="text-sm text-muted-foreground">{product.brand}</p>
                   </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs uppercase text-muted-foreground mb-1">DESCRIPTION</h3>
-              <p className="text-sm">{product.description}</p>
-            </div>
-          </div>
-        ))}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="p-4 border-b font-medium">Price</td>
+              {compareProducts.map((product) => (
+                <td key={`price-${product.id}`} className="p-4 border-b text-center">
+                  <div className="flex flex-col items-center">
+                    {product.originalPrice ? (
+                      <>
+                        <span className="font-medium">${product.price.toFixed(2)}</span>
+                        <span className="text-sm text-muted-foreground line-through">
+                          ${product.originalPrice.toFixed(2)}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="font-medium">${product.price.toFixed(2)}</span>
+                    )}
+                  </div>
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td className="p-4 border-b font-medium">Size</td>
+              {compareProducts.map((product) => (
+                <td key={`size-${product.id}`} className="p-4 border-b text-center">
+                  {product.sizes ? product.sizes.join(", ") : "N/A"}
+                </td>
+              ))}
+            </tr>
+            <tr>
+              <td className="p-4 border-b font-medium">Color</td>
+              {compareProducts.map((product) => (
+                <td key={`color-${product.id}`} className="p-4 border-b text-center">
+                  {product.colors ? product.colors.join(", ") : "N/A"}
+                </td>
+              ))}
+            </tr>
+            {allFeatures.map((feature) => (
+              <tr key={`feature-${feature}`}>
+                <td className="p-4 border-b font-medium">{feature}</td>
+                {compareProducts.map((product) => (
+                  <td key={`feature-${product.id}-${feature}`} className="p-4 border-b text-center">
+                    {product.features && product.features.includes(feature) ? "✓" : "✗"}
+                  </td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <td className="p-4 border-b font-medium">Actions</td>
+              {compareProducts.map((product) => (
+                <td key={`actions-${product.id}`} className="p-4 border-b text-center">
+                  <div className="flex flex-col gap-2 items-center">
+                    <Link href={`/product/${product.id}`}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        View Details
+                      </Button>
+                    </Link>
+                    <Button size="sm" className="w-full">
+                      Add to Cart
+                    </Button>
+                  </div>
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   )
 }
-
