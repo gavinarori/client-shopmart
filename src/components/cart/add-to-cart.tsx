@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react"
 import { CheckCircle, Loader2, MinusCircle, PlusCircle, ShoppingCart } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-
 import { cn } from "@/lib/utils"
 
-// You can extend this interface based on your product schema
+// Interfaces
 interface CartItem {
   id: string | number
   title: string
@@ -18,21 +18,18 @@ interface CartItem {
   variant?: string
 }
 
-// Create a simple cart context that can be extended later
+// Simple cart context
 let cart: CartItem[] = []
 let listeners: (() => void)[] = []
 
-// Simple cart state management functions
 export const useCart = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>(cart)
 
   useEffect(() => {
-    const updateCart = () => {
-      setCartItems([...cart])
-    }
+    const updateCart = () => setCartItems([...cart])
     listeners.push(updateCart)
     return () => {
-      listeners = listeners.filter((listener) => listener !== updateCart)
+      listeners = listeners.filter((l) => l !== updateCart)
     }
   }, [])
 
@@ -41,32 +38,30 @@ export const useCart = () => {
     count: cartItems.reduce((acc, item) => acc + item.quantity, 0),
     total: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
     addItem: (item: CartItem) => {
-      const existingItemIndex = cart.findIndex(
-        (cartItem) => cartItem.id === item.id && cartItem.variant === item.variant,
+      const existingIndex = cart.findIndex(
+        (i) => i.id === item.id && i.variant === item.variant
       )
-
-      if (existingItemIndex > -1) {
-        cart[existingItemIndex].quantity += item.quantity
+      if (existingIndex > -1) {
+        cart[existingIndex].quantity += item.quantity
       } else {
         cart.push(item)
       }
-
-      listeners.forEach((listener) => listener())
+      listeners.forEach((fn) => fn())
     },
     removeItem: (id: string | number, variant?: string) => {
       cart = cart.filter((item) => !(item.id === id && item.variant === variant))
-      listeners.forEach((listener) => listener())
+      listeners.forEach((fn) => fn())
     },
     updateQuantity: (id: string | number, quantity: number, variant?: string) => {
-      const item = cart.find((item) => item.id === id && item.variant === variant)
+      const item = cart.find((i) => i.id === id && i.variant === variant)
       if (item) {
         item.quantity = quantity
-        listeners.forEach((listener) => listener())
+        listeners.forEach((fn) => fn())
       }
     },
     clearCart: () => {
       cart = []
-      listeners.forEach((listener) => listener())
+      listeners.forEach((fn) => fn())
     },
   }
 }
@@ -77,12 +72,14 @@ export function AddToCart({
   selectedVariant = variants?.[0],
   product,
   className,
+  stock,
 }: {
   variants: any[]
   availableForSale: boolean
   selectedVariant?: any
   product: any
   className?: string
+  stock: number
 }) {
   const [quantity, setQuantity] = useState(1)
   const [adding, setAdding] = useState(false)
@@ -92,45 +89,49 @@ export function AddToCart({
 
   const handleQuantityChange = (increment: number) => {
     setQuantity((prev) => {
-      const newQuantity = prev + increment
-      return newQuantity < 1 ? 1 : newQuantity
+      const newQty = prev + increment
+      if (newQty > stock) {
+        toast.error(`Only ${stock} in stock`)
+        return prev
+      }
+      return newQty < 1 ? 1 : newQty
     })
   }
 
   const handleAddToCart = () => {
+    if (quantity > stock) {
+      toast.error("Quantity exceeds available stock.")
+      return
+    }
+
     setAdding(true)
 
-    // Create a cart item from the product and selected variant
     const cartItem: CartItem = {
       id: product.id,
       title: product.title,
       price: selectedVariant?.price?.amount || product.priceRange.maxVariantPrice.amount,
-      quantity: quantity,
+      quantity,
       image: product.featuredImage?.url || product.images?.[0]?.url,
       variant: selectedVariant?.title,
     }
 
-    // Simulate adding to cart with a slight delay for animation
     setTimeout(() => {
       addItem(cartItem)
       setAdding(false)
       setAdded(true)
 
- 
-
-      // Reset added state after a moment
       setTimeout(() => {
         setAdded(false)
-        setQuantity(1) // Reset quantity after adding
+        setQuantity(1)
       }, 2000)
     }, 800)
   }
 
-  const isOutOfStock = !availableForSale || (selectedVariant && !selectedVariant.availableForSale)
+  const isOutOfStock = !availableForSale || stock <= 0 || (selectedVariant && !selectedVariant.availableForSale)
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Quantity selector */}
+      {/* Quantity Selector */}
       <div className="flex items-center space-x-4">
         <span className="text-sm font-medium">Quantity:</span>
         <div className="flex items-center">
@@ -142,7 +143,6 @@ export function AddToCart({
             className="h-8 w-8"
           >
             <MinusCircle className="h-5 w-5" />
-            <span className="sr-only">Decrease quantity</span>
           </Button>
 
           <span className="w-8 text-center">{quantity}</span>
@@ -150,17 +150,16 @@ export function AddToCart({
           <Button
             variant="ghost"
             size="icon"
-            disabled={adding}
+            disabled={adding || quantity >= stock}
             onClick={() => handleQuantityChange(1)}
             className="h-8 w-8"
           >
             <PlusCircle className="h-5 w-5" />
-            <span className="sr-only">Increase quantity</span>
           </Button>
         </div>
       </div>
 
-      {/* Add to cart button with animation states */}
+      {/* Add To Cart Button */}
       <AnimatePresence mode="wait">
         <motion.div
           key={added ? "added" : adding ? "adding" : "idle"}
@@ -173,7 +172,7 @@ export function AddToCart({
           <Button
             onClick={handleAddToCart}
             disabled={isOutOfStock || adding || added}
-            className={cn("relative w-full transition-all", added ? "bg-green-600 hover:bg-green-700" : "")}
+            className={cn("w-full transition-all", added && "bg-green-600 hover:bg-green-700")}
           >
             {isOutOfStock ? (
               "Out of Stock"
@@ -199,4 +198,3 @@ export function AddToCart({
     </div>
   )
 }
-

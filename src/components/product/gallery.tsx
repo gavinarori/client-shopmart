@@ -1,18 +1,21 @@
 "use client"
 
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react"
-import { GridTileImage } from "@/components/grid/tile"
+import { useRef, useEffect } from "react"
+import { ArrowLeftIcon, ArrowRightIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import { createUrl } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
+import { Button } from "@/components/ui/button"
 
 export function Gallery({ images }: { images: { src: string; altText: string }[] }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const imageSearchParam = searchParams.get("image")
   const imageIndex = imageSearchParam ? Number.parseInt(imageSearchParam) : 0
+  const thumbnailsRef = useRef<HTMLUListElement>(null)
 
+  // Set up navigation URLs
   const nextSearchParams = new URLSearchParams(searchParams.toString())
   const nextImageIndex = imageIndex + 1 < images.length ? imageIndex + 1 : 0
   nextSearchParams.set("image", nextImageIndex.toString())
@@ -23,12 +26,41 @@ export function Gallery({ images }: { images: { src: string; altText: string }[]
   previousSearchParams.set("image", previousImageIndex.toString())
   const previousUrl = createUrl(pathname, previousSearchParams)
 
+  // Scroll the active thumbnail into view when the image index changes
+  useEffect(() => {
+    if (thumbnailsRef.current) {
+      const activeThumbnail = thumbnailsRef.current.querySelector(`[data-index="${imageIndex}"]`)
+      if (activeThumbnail) {
+        activeThumbnail.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        })
+      }
+    }
+  }, [imageIndex])
+
+  // Thumbnail carousel navigation
+  const scrollThumbnails = (direction: "left" | "right") => {
+    if (!thumbnailsRef.current) return
+
+    const container = thumbnailsRef.current
+    const scrollAmount = 200 // Adjust as needed
+
+    if (direction === "left") {
+      container.scrollBy({ left: -scrollAmount, behavior: "smooth" })
+    } else {
+      container.scrollBy({ left: scrollAmount, behavior: "smooth" })
+    }
+  }
+
   const buttonClassName =
     "h-full px-6 transition-all ease-in-out hover:scale-110 hover:text-black dark:hover:text-white flex items-center justify-center"
 
   return (
     <>
-      <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden">
+      {/* Main Image */}
+      <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden  p-5 ">
         {images[imageIndex] && (
           <Image
             className="h-full w-full object-contain"
@@ -55,30 +87,62 @@ export function Gallery({ images }: { images: { src: string; altText: string }[]
         ) : null}
       </div>
 
+      {/* Thumbnails */}
       {images.length > 1 ? (
-        <ul className="my-12 flex items-center justify-center gap-2 overflow-auto py-1 lg:mb-0">
-          {images.map((image, index) => {
-            const isActive = index === imageIndex
-            const imageSearchParams = new URLSearchParams(searchParams.toString())
+        <div className="relative mt-4">
+          {images.length > 4 && (
+            <>
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white shadow-md"
+                onClick={() => scrollThumbnails("left")}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white shadow-md"
+                onClick={() => scrollThumbnails("right")}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </>
+          )}
 
-            imageSearchParams.set("image", index.toString())
+          <ul
+            ref={thumbnailsRef}
+            className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-3 px-1"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {images.map((image, index) => {
+              const isActive = index === imageIndex
+              const imageSearchParams = new URLSearchParams(searchParams.toString())
+              imageSearchParams.set("image", index.toString())
 
-            return (
-              <li key={image.src} className="h-20 w-20">
-                <Link
-                  aria-label="Enlarge product image"
-                  href={createUrl(pathname, imageSearchParams)}
-                  scroll={false}
-                  className="h-full w-full"
-                >
-                  <GridTileImage alt={image.altText} src={image.src} width={80} height={80} active={isActive} />
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+              return (
+                <li key={image.src} className="h-[120px] w-[120px] flex-none" data-index={index}>
+                  <Link
+                    aria-label={`View product image ${index + 1}`}
+                    href={createUrl(pathname, imageSearchParams)}
+                    scroll={false}
+                    className={`block h-full w-full transition-all duration-200 ${
+                      isActive
+                        ? "border-2 border-blue-500 opacity-100"
+                        : "border border-gray-200 opacity-80 hover:opacity-100"
+                    }`}
+                  >
+                    <div className="relative h-full w-full">
+                      <Image alt={image.altText} src={image.src || "/placeholder.svg"} fill className="object-cover" />
+                    </div>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
       ) : null}
     </>
   )
 }
-
