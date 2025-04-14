@@ -24,7 +24,7 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
   const dispatch = useDispatch<any>()
   const router = useRouter()
 
-  // Local state
+  
   const [text, setText] = useState("")
   const [receverMessage, setReceverMessage] = useState<any>(null)
   const [activeSeller, setActiveSeller] = useState<any[]>([])

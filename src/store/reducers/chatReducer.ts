@@ -34,7 +34,6 @@ interface ChatState {
 }
 
 // Async Thunks
-
 export const add_friend = createAsyncThunk<
   AddFriendResponse,
   Record<string, any>,
@@ -92,7 +91,7 @@ export const chatReducer = createSlice({
       state.my_friends = action.payload.myFriends
     })
     builder.addCase(send_message.fulfilled, (state, action) => {
-      let tempFriends = [...state.my_friends]
+      const tempFriends = [...state.my_friends]
       const index = tempFriends.findIndex(f => f.fdId === action.payload.message.receverId)
 
       // Move friend to the top of the list if found
