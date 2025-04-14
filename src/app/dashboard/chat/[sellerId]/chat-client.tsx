@@ -15,22 +15,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Send, Paperclip, MoreVertical, Phone, Video, ShoppingBag } from "lucide-react"
 import { add_friend, send_message, updateMessage, messageClear } from "@/store/reducers/chatReducer"
+import { ProductPreview } from "@/components/product-preview-card"
 
 // Initialize socket outside component to prevent multiple connections
 let socket: any
+
+interface ProductInfo {
+  id: string
+  name: string
+  price: number
+  image: string
+  slug?: string
+}
 
 export default function ChatClient({ sellerId }: { sellerId: string }) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const dispatch = useDispatch<any>()
   const router = useRouter()
 
-  
   const [text, setText] = useState("")
   const [receverMessage, setReceverMessage] = useState<any>(null)
   const [activeSeller, setActiveSeller] = useState<any[]>([])
   const [socketInitialized, setSocketInitialized] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
+  const [pendingProduct, setPendingProduct] = useState<ProductInfo | null>(null)
 
   // Redux state
   const { userInfo } = useSelector((state: any) => state.auth)
@@ -62,6 +71,21 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
       }
     }
   }, [userInfo, socketInitialized])
+
+  // Check for product in localStorage when component mounts
+  useEffect(() => {
+    const storedProduct = localStorage.getItem("chatProduct")
+    if (storedProduct) {
+      try {
+        const product = JSON.parse(storedProduct)
+        setPendingProduct(product)
+        // Clear localStorage to prevent showing on refresh
+        localStorage.removeItem("chatProduct")
+      } catch (error) {
+        console.error("Error parsing product data:", error)
+      }
+    }
+  }, [])
 
   // Add friend when sellerId changes
   useEffect(() => {
@@ -116,9 +140,36 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
     }
   }
 
-  // Share product handler (placeholder)
+  // Share product handler
   const handleShareProduct = () => {
-    toast.info("Product sharing feature coming soon!")
+    if (!pendingProduct) {
+      toast.info("No product selected to share")
+      return
+    }
+
+    if (userInfo?.id && currentFd) {
+      // Create a formatted message with the product details
+      const productMessage = `I'm interested in this product: ${pendingProduct.name} - $${pendingProduct.price.toFixed(2)}`
+
+      dispatch(
+        send_message({
+          userId: userInfo.id,
+          text: productMessage,
+          sellerId: currentFd.fdId,
+          name: userInfo.name,
+          productInfo: pendingProduct,
+        }),
+      )
+
+      // Clear the pending product after sharing
+      setPendingProduct(null)
+      toast.success("Product shared with seller")
+    }
+  }
+
+  // Dismiss product preview
+  const dismissProductPreview = () => {
+    setPendingProduct(null)
   }
 
   // Redirect if not logged in
@@ -141,7 +192,7 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
     time: "Now",
     unread: 0,
     online: activeSeller.some((seller) => seller.sellerId === friend.fdId),
-    role: "Seller", 
+    role: "Seller",
   }))
 
   return (
@@ -165,7 +216,7 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
           <TabsContent value="all" className="m-0">
             <div className="space-y-1 p-2">
               {formattedFriends.length > 0 ? (
-                formattedFriends.map((friend:any) => (
+                formattedFriends.map((friend: any) => (
                   <Link href={`/dashboard/chat/${friend.id}`} key={`friend-${friend.id}`}>
                     <div
                       className={`flex items-center gap-3 rounded-lg p-3 cursor-pointer hover:bg-blue-500 ${
@@ -206,10 +257,10 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
 
           <TabsContent value="sellers" className="m-0">
             <div className="space-y-1 p-2">
-              {formattedFriends.filter((f:any) => f.role === "Seller").length > 0 ? (
+              {formattedFriends.filter((f: any) => f.role === "Seller").length > 0 ? (
                 formattedFriends
-                  .filter((f:any) => f.role === "Seller")
-                  .map((friend:any) => (
+                  .filter((f: any) => f.role === "Seller")
+                  .map((friend: any) => (
                     <Link href={`/dashboard/chat/${friend.id}`} key={`seller-${friend.id}`}>
                       <div
                         className={`flex items-center gap-3 rounded-lg p-3 cursor-pointer hover:bg-blue-500 ${
@@ -290,12 +341,25 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
               </div>
             </div>
 
+            {/* Product preview (if available) */}
+            {pendingProduct && (
+              <div className="px-4 pt-4">
+                <ProductPreview
+                  product={pendingProduct}
+                  onShare={handleShareProduct}
+                  onDismiss={dismissProductPreview}
+                  isCompact={true}
+                />
+              </div>
+            )}
+
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 bg-background">
               <div className="space-y-4">
                 {fd_messages.map((message: any, index: number) => {
                   const isSender = currentFd?.fdId === message.receverId
                   const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                  const hasProductInfo = message.productInfo
 
                   return (
                     <div
@@ -313,7 +377,15 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
                           isSender ? "bg-blue-500 text-white" : "bg-white border"
                         }`}
                       >
-                        <p>{message.message}</p>
+                        {hasProductInfo ? (
+                          <div className="space-y-3">
+                            <ProductPreview product={message.productInfo} inMessage={true} />
+                            <p>{message.message}</p>
+                          </div>
+                        ) : (
+                          <p>{message.message}</p>
+                        )}
+
                         <div className={`text-xs mt-1 ${isSender ? "text-blue-100" : ""}`}>
                           {timestamp} {isSender && "✓✓"}
                         </div>
@@ -355,9 +427,21 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
             {/* Message input */}
             <div className="p-4 border-t bg-background">
               <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-                <Button type="button" variant="ghost" size="icon" onClick={handleShareProduct}>
-                  <ShoppingBag className="h-5 w-5" />
-                </Button>
+                {pendingProduct ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleShareProduct}
+                    className="text-blue-500"
+                  >
+                    <ShoppingBag className="h-5 w-5" />
+                  </Button>
+                ) : (
+                  <Button type="button" variant="ghost" size="icon" disabled>
+                    <ShoppingBag className="h-5 w-5" />
+                  </Button>
+                )}
                 <Button type="button" variant="ghost" size="icon">
                   <Paperclip className="h-5 w-5" />
                 </Button>
