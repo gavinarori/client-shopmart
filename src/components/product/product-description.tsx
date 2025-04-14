@@ -1,5 +1,4 @@
 "use client"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useDispatch, useSelector } from "react-redux"
 import { useState, useEffect } from "react"
@@ -112,6 +111,29 @@ export function ProductDescription({ product }: { product: any }) {
     }
 
     if (product.sellerId) {
+      // Calculate the final price with discount
+      const finalPrice = product.discount
+        ? product.price - Math.floor((product.price * product.discount) / 100)
+        : product.price
+
+      // Store product info in localStorage
+      localStorage.setItem(
+        "chatProduct",
+        JSON.stringify({
+          id: product._id,
+          name: product.name,
+          price: finalPrice,
+          image: product.images?.[0] || "/placeholder.svg",
+          slug: product.slug,
+        }),
+      )
+
+      // Show confirmation toast
+      toast.success("Product added to chat", {
+        description: "You can share it with the seller in the chat",
+      })
+
+      // Navigate to chat
       router.push(`/dashboard/chat/${product.sellerId}`)
     }
   }
@@ -122,30 +144,29 @@ export function ProductDescription({ product }: { product: any }) {
         <CartCount />
       </div>
 
-    {/* Product Title and Price */}
-<div className="mb-6 flex flex-col border-b pb-6 dark:border-neutral-700">
-  <div className="flex items-center justify-between flex-wrap gap-4">
-    <h1 className="text-4xl font-medium">{product.name}</h1>
+      {/* Product Title and Price */}
+      <div className="mb-6 flex flex-col border-b pb-6 dark:border-neutral-700">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <h1 className="text-4xl font-medium">{product.name}</h1>
 
-    {product.discount !== 0 ? (
-      <div className="flex items-center gap-4">
-        <span className="line-through text-gray-500 text-lg">${product.price}</span>
-        <div className="rounded-full bg-blue-600 px-4 py-2 text-sm text-white flex items-center">
-          <Price
-            amount={(product.price - Math.floor((product.price * product.discount) / 100)).toString()}
-            currencyCode="USD"
-          />
-          <span className="ml-1">(-{product.discount}%)</span>
+          {product.discount !== 0 ? (
+            <div className="flex items-center gap-4">
+              <span className="line-through text-gray-500 text-lg">${product.price}</span>
+              <div className="rounded-full bg-blue-600 px-4 py-2 text-sm text-white flex items-center">
+                <Price
+                  amount={(product.price - Math.floor((product.price * product.discount) / 100)).toString()}
+                  currencyCode="USD"
+                />
+                <span className="ml-1">(-{product.discount}%)</span>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-full bg-blue-600 px-4 py-2 text-sm text-white">
+              <Price amount={product.price.toString()} currencyCode="USD" />
+            </div>
+          )}
         </div>
       </div>
-    ) : (
-      <div className="rounded-full bg-blue-600 px-4 py-2 text-sm text-white">
-        <Price amount={product.price.toString()} currencyCode="USD" />
-      </div>
-    )}
-  </div>
-</div>
-
 
       {/* Location */}
       {product.location && (
@@ -181,42 +202,27 @@ export function ProductDescription({ product }: { product: any }) {
 
       {/* Add to Cart */}
       <div className="flex gap-3 mb-8">
-<AddToCart
-  variants={formattedProduct.variants}
-  availableForSale={formattedProduct.availableForSale}
-  product={formattedProduct}
-  className="flex-1"
-  stock={product.stock}
-/>
+        <AddToCart
+          variants={formattedProduct.variants}
+          availableForSale={formattedProduct.availableForSale}
+          product={formattedProduct}
+          className="flex-1"
+          stock={product.stock}
+        />
 
-
-  <Button
-    onClick={addToWishlist}
-    className="h-full aspect-square mt-11 flex items-center justify-center "
-  >
-    <Heart className="h-5 w-5" />
-  </Button>
-</div>
-
+        <Button onClick={addToWishlist} className="h-full aspect-square mt-11 flex items-center justify-center ">
+          <Heart className="h-5 w-5" />
+        </Button>
+      </div>
 
       {/* Action Buttons */}
       <div className="flex gap-3">
-        {product.stock ? (
-          <Button
-            onClick={buyNow}
+        {product.stock ? <Button onClick={buyNow}>Buy Now</Button> : null}
 
-          >
-            Buy Now
-          </Button>
-        ) : null}
-
-<Button
-onClick={chatWithSeller}>
-  <MessageCircle/>
-Chat Seller
-</Button>
-       
-
+        <Button onClick={chatWithSeller} className="bg-green-600 hover:bg-green-700">
+          <MessageCircle className="mr-2 h-5 w-5" />
+          Chat Seller
+        </Button>
       </div>
     </CartProvider>
   )
