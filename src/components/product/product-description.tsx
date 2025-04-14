@@ -104,6 +104,18 @@ export function ProductDescription({ product }: { product: any }) {
     toast.success(`Proceeding to checkout with ${quantity} items`)
   }
 
+  const chatWithSeller = () => {
+    if (!userInfo) {
+      toast.error("Please login to chat with seller")
+      router.push("/login")
+      return
+    }
+
+    if (product.sellerId) {
+      router.push(`/dashboard/chat/${product.sellerId}`)
+    }
+  }
+
   return (
     <CartProvider>
       <div className="flex justify-end mb-4">
@@ -197,12 +209,12 @@ export function ProductDescription({ product }: { product: any }) {
             Buy Now
           </Button>
         ) : null}
-<Link href={`/dashboard/chat/${product.sellerId}`}>
-<Button>
+
+<Button
+onClick={chatWithSeller}>
   <MessageCircle/>
 Chat Seller
 </Button>
-</Link>
        
 
       </div>
