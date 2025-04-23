@@ -31,18 +31,19 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      > <ThemeProvider
+      > <Providers>  
+      <ThemeProvider
       attribute="class"
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
     >
       <Navbar/>
-      <Providers> 
+     
           {children}
           <Toaster position="top-right" />
-        </Providers>
     </ThemeProvider>
+    </Providers>
       </body>
     </html>
   );

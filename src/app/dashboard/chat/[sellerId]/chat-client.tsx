@@ -374,7 +374,7 @@ export default function ChatClient({ sellerId }: { sellerId: string }) {
                       )}
                       <div
                         className={`max-w-[80%] rounded-lg p-3 ${
-                          isSender ? "bg-blue-500 text-white" : "bg-white border"
+                          isSender ? "bg-blue-500 text-white" : " border"
                         }`}
                       >
                         {hasProductInfo ? (
