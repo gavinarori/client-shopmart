@@ -24,7 +24,7 @@ export default function Header() {
   const pathname = usePathname()
 
   // Add a default empty array for categorys
-  const { categorys = [] } = useSelector((state: any) => state.home || { categorys: [] })
+  const { categorys  } = useSelector((state: any) => state.home || { categorys: [] })
   const { userInfo } = useSelector((state: any) => state.auth)
   const { card_product_count = 0, wishlist_count = 0 } = useSelector(
     (state: any) => state.card || { card_product_count: 0, wishlist_count: 0 },
