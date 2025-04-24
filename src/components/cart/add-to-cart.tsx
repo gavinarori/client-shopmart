@@ -1,70 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { CheckCircle, Loader2, MinusCircle, PlusCircle, ShoppingCart } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
+import { useDispatch, useSelector } from "react-redux"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-
-// Interfaces
-interface CartItem {
-  id: string | number
-  title: string
-  price: number
-  quantity: number
-  image?: string
-  variant?: string
-}
-
-// Simple cart context
-let cart: CartItem[] = []
-let listeners: (() => void)[] = []
-
-export const useCart = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>(cart)
-
-  useEffect(() => {
-    const updateCart = () => setCartItems([...cart])
-    listeners.push(updateCart)
-    return () => {
-      listeners = listeners.filter((l) => l !== updateCart)
-    }
-  }, [])
-
-  return {
-    items: cartItems,
-    count: cartItems.reduce((acc, item) => acc + item.quantity, 0),
-    total: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
-    addItem: (item: CartItem) => {
-      const existingIndex = cart.findIndex(
-        (i) => i.id === item.id && i.variant === item.variant
-      )
-      if (existingIndex > -1) {
-        cart[existingIndex].quantity += item.quantity
-      } else {
-        cart.push(item)
-      }
-      listeners.forEach((fn) => fn())
-    },
-    removeItem: (id: string | number, variant?: string) => {
-      cart = cart.filter((item) => !(item.id === id && item.variant === variant))
-      listeners.forEach((fn) => fn())
-    },
-    updateQuantity: (id: string | number, quantity: number, variant?: string) => {
-      const item = cart.find((i) => i.id === id && i.variant === variant)
-      if (item) {
-        item.quantity = quantity
-        listeners.forEach((fn) => fn())
-      }
-    },
-    clearCart: () => {
-      cart = []
-      listeners.forEach((fn) => fn())
-    },
-  }
-}
+import { add_to_card } from "@/store/reducers/cardReducer"
 
 export function AddToCart({
   variants,
@@ -81,11 +26,14 @@ export function AddToCart({
   className?: string
   stock: number
 }) {
+  const dispatch = useDispatch<any>()
+  const router = useRouter()
+  const { userInfo } = useSelector((state: any) => state.auth)
+  const { count } = useSelector((state: any) => state.card)
+
   const [quantity, setQuantity] = useState(1)
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
-
-  const { addItem } = useCart()
 
   const handleQuantityChange = (increment: number) => {
     setQuantity((prev) => {
@@ -99,6 +47,12 @@ export function AddToCart({
   }
 
   const handleAddToCart = () => {
+    if (!userInfo) {
+      toast.error("Please login to add items to cart")
+      router.push("/login")
+      return
+    }
+
     if (quantity > stock) {
       toast.error("Quantity exceeds available stock.")
       return
@@ -106,17 +60,22 @@ export function AddToCart({
 
     setAdding(true)
 
-    const cartItem: CartItem = {
-      id: product.id,
-      title: product.title,
-      price: selectedVariant?.price?.amount || product.priceRange.maxVariantPrice.amount,
-      quantity,
-      image: product.featuredImage?.url || product.images?.[0]?.url,
-      variant: selectedVariant?.title,
-    }
+    // Use the original product ID from the database
+    const productId = product.id || product._id
 
+    // Dispatch Redux action
+    dispatch(
+      add_to_card({
+        userId: userInfo.id,
+        quantity,
+        productId,
+        // Include variant information if available
+        ...(selectedVariant?.title && { variant: selectedVariant.title }),
+      }),
+    )
+
+    // Show animation and reset
     setTimeout(() => {
-      addItem(cartItem)
       setAdding(false)
       setAdded(true)
 
