@@ -17,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { get_card_products, get_wishlist_products } from "@/store/reducers/cardReducer"
+import { CartDrawer } from "@/components/cart/cart-drawer"
 
 export default function Header() {
   const dispatch = useDispatch()
@@ -158,7 +159,8 @@ export default function Header() {
             </Button>
 
             {/* Cart */}
-            <Button variant="ghost" size="icon" className="relative" onClick={redirect_card_page} aria-label="Cart">
+            <CartDrawer>
+            <Button variant="ghost" size="icon" className="relative" aria-label="Cart">
               <ShoppingCart className="h-5 w-5" />
               {card_product_count > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
@@ -166,6 +168,8 @@ export default function Header() {
                 </span>
               )}
             </Button>
+            </CartDrawer>
+            
 
             {/* User Menu */}
             {userInfo ? (
@@ -203,7 +207,8 @@ export default function Header() {
 
           {/* Mobile Menu Trigger */}
           <div className="flex items-center space-x-4 md:hidden">
-            <Button variant="ghost" size="icon" className="relative" onClick={redirect_card_page} aria-label="Cart">
+          <CartDrawer>
+            <Button variant="ghost" size="icon" className="relative" aria-label="Cart">
               <ShoppingCart className="h-5 w-5" />
               {card_product_count > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
@@ -211,6 +216,7 @@ export default function Header() {
                 </span>
               )}
             </Button>
+            </CartDrawer>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
