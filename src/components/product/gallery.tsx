@@ -7,6 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Lens } from "@/components/magicui/lens";
 
 export function Gallery({ images }: { images: { src: string; altText: string }[] }) {
   const pathname = usePathname()
@@ -62,14 +63,20 @@ export function Gallery({ images }: { images: { src: string; altText: string }[]
       {/* Main Image */}
       <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden  p-5 ">
         {images[imageIndex] && (
-          <Image
-            className="h-full w-full object-contain"
-            fill
+           <Lens
+           zoomFactor={2}
+           lensSize={150}
+           isStatic={false}
+           ariaLabel="Zoom Area"
+         >
+          <img
+            className="h-full w-full object-contain" 
             sizes="(min-width: 1024px) 66vw, 100vw"
             alt={images[imageIndex]?.altText as string}
             src={(images[imageIndex]?.src as string) || "/placeholder.svg"}
-            priority={true}
+         
           />
+          </Lens>
         )}
 
         {images.length > 1 ? (
