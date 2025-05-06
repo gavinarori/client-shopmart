@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit"
-import axios from "axios"
+import api from "@/app/api/api"
 
 // Types
 export interface Transaction {
@@ -55,7 +55,7 @@ export const initiateSTKPush = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      const response = await axios.post("/api/pay/stkpush", paymentData)
+      const response = await api.post("/pay/stkpush", paymentData)
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || "Failed to initiate payment")
@@ -67,7 +67,7 @@ export const checkPaymentStatus = createAsyncThunk(
   "payment/checkPaymentStatus",
   async (checkoutRequestID: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/pay/check-status", { checkoutRequestID })
+      const response = await api.post("/pay/check-status", { checkoutRequestID })
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || "Failed to check payment status")
@@ -79,7 +79,7 @@ export const withdrawFunds = createAsyncThunk(
   "payment/withdrawFunds",
   async (withdrawData: { amount: number; phone: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/wallet/withdraw", withdrawData)
+      const response = await api.post("/wallet/withdraw", withdrawData)
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || "Failed to withdraw funds")
@@ -89,7 +89,7 @@ export const withdrawFunds = createAsyncThunk(
 
 export const fetchTransactions = createAsyncThunk("payment/fetchTransactions", async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get("/api/transactions")
+    const response = await api.get("/transactions")
     return response.data
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.error || "Failed to fetch transactions")
@@ -98,7 +98,7 @@ export const fetchTransactions = createAsyncThunk("payment/fetchTransactions", a
 
 export const fetchWalletBalance = createAsyncThunk("payment/fetchWalletBalance", async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get("/api/wallet/balance")
+    const response = await api.get("/wallet/balance")
     return response.data
   } catch (error: any) {
     return rejectWithValue(error.response?.data?.error || "Failed to fetch wallet balance")
