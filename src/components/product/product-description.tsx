@@ -11,6 +11,8 @@ import { AddToCart } from "@/components/cart/add-to-cart"
 import { CartCount } from "@/components/cart/cart-count"
 import { Button } from "../ui/button"
 import { messageClear, add_to_wishlist } from "@/store/reducers/cardReducer"
+import { PaymentForm } from "./payment-form"
+import { setCurrentTransaction } from "@/store/reducers/paymentReducer"
 
 export function ProductDescription({ product }: { product: any }) {
   const dispatch = useDispatch<any>()
@@ -18,6 +20,7 @@ export function ProductDescription({ product }: { product: any }) {
   const { userInfo } = useSelector((state: any) => state.auth)
   const { errorMessage, successMessage } = useSelector((state: any) => state.card)
   const [quantity, setQuantity] = useState(1)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
 
   // Format product data to match expected structure
   const formattedProduct = {
@@ -77,30 +80,17 @@ export function ProductDescription({ product }: { product: any }) {
   const buyNow = () => {
     if (!product) return
 
-    let price = 0
-    if (product.discount !== 0) {
-      price = product.price - Math.floor((product.price * product.discount) / 100)
-    } else {
-      price = product.price
+    if (!userInfo) {
+      toast.error("Please login to make a purchase")
+      router.push("/login")
+      return
     }
 
-    const obj = [
-      {
-        sellerId: product.sellerId,
-        shopName: product.shopName,
-        price: quantity * (price - Math.floor((price * 5) / 100)),
-        products: [
-          {
-            quantity,
-            productInfo: product,
-          },
-        ],
-      },
-    ]
+    // Reset any previous transaction
+    dispatch(setCurrentTransaction(null))
 
-    // Navigate to shipping page with product data
-    router.push("/shipping")
-    toast.success(`Proceeding to checkout with ${quantity} items`)
+    // Open payment modal
+    setIsPaymentModalOpen(true)
   }
 
   const chatWithSeller = () => {
@@ -224,6 +214,16 @@ export function ProductDescription({ product }: { product: any }) {
           Chat Seller
         </Button>
       </div>
+
+      {/* Payment Modal */}
+      {isPaymentModalOpen && (
+        <PaymentForm
+          isOpen={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          product={product}
+          quantity={quantity}
+        />
+      )}
     </CartProvider>
   )
 }
