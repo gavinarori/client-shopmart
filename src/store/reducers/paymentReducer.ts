@@ -51,6 +51,7 @@ export const initiateSTKPush = createAsyncThunk(
       sellerId: string
       productId: string
       shopName: string
+      buyerId: string
     },
     { rejectWithValue },
   ) => {
@@ -71,6 +72,19 @@ export const checkPaymentStatus = createAsyncThunk(
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || "Failed to check payment status")
+    }
+  },
+)
+
+// New thunk for querying transaction status directly from M-Pesa
+export const queryTransactionStatus = createAsyncThunk(
+  "payment/queryTransactionStatus",
+  async (params: { transactionId?: string; checkoutRequestID?: string }, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/pay/transaction-status", params)
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || "Failed to query transaction status")
     }
   },
 )
@@ -117,6 +131,12 @@ const paymentReducer = createSlice({
     setCurrentTransaction: (state, action: PayloadAction<Transaction | null>) => {
       state.currentTransaction = action.payload
     },
+    resetPaymentProcess: (state) => {
+      state.loading = false
+      state.error = null
+      state.success = null
+      state.currentTransaction = null
+    },
   },
   extraReducers: (builder) => {
     // Initiate STK Push
@@ -140,15 +160,44 @@ const paymentReducer = createSlice({
     })
     builder.addCase(checkPaymentStatus.fulfilled, (state, action) => {
       state.loading = false
-      state.currentTransaction = action.payload.data
 
-      if (action.payload.data.status === "completed") {
-        state.success = "Payment completed successfully!"
-      } else if (action.payload.data.status === "failed") {
-        state.error = "Payment failed. Please try again."
+      // Only update if we have valid data
+      if (action.payload && action.payload.data) {
+        state.currentTransaction = action.payload.data
+
+        if (action.payload.data.status === "completed") {
+          state.success = "Payment completed successfully!"
+        } else if (action.payload.data.status === "failed") {
+          state.error = "Payment failed. Please try again."
+        }
+        // For pending status, we don't set any message as we're still waiting
       }
     })
     builder.addCase(checkPaymentStatus.rejected, (state, action) => {
+      state.loading = false
+      state.error = action.payload as string
+    })
+
+    // Query Transaction Status
+    builder.addCase(queryTransactionStatus.pending, (state) => {
+      state.loading = true
+      state.error = null
+    })
+    builder.addCase(queryTransactionStatus.fulfilled, (state, action) => {
+      state.loading = false
+
+      // Handle the response from the M-Pesa Transaction Status API
+      if (action.payload && action.payload.data) {
+        state.currentTransaction = action.payload.data
+
+        if (action.payload.data.status === "completed") {
+          state.success = "Payment completed successfully!"
+        } else if (action.payload.data.status === "failed") {
+          state.error = "Payment failed. Please try again."
+        }
+      }
+    })
+    builder.addCase(queryTransactionStatus.rejected, (state, action) => {
       state.loading = false
       state.error = action.payload as string
     })
@@ -197,5 +246,5 @@ const paymentReducer = createSlice({
   },
 })
 
-export const { clearPaymentState, setCurrentTransaction } = paymentReducer.actions
+export const { clearPaymentState, setCurrentTransaction, resetPaymentProcess } = paymentReducer.actions
 export default paymentReducer.reducer

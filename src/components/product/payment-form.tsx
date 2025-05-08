@@ -1,9 +1,14 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { toast } from "sonner"
 import { Phone } from "lucide-react"
-import { initiateSTKPush, checkPaymentStatus } from "@/store/reducers/paymentReducer"
+import {
+  initiateSTKPush,
+  checkPaymentStatus,
+  queryTransactionStatus,
+  setCurrentTransaction,
+} from "@/store/reducers/paymentReducer"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,6 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Loader2 } from "lucide-react"
+import { PaymentStatusIndicator } from "./payment-status-indicator"
+import { usePaymentWebSocket } from "@/hooks/usePaymentWebSocket"
 
 interface PaymentFormProps {
   isOpen: boolean
@@ -31,7 +38,12 @@ export function PaymentForm({ isOpen, onClose, product, quantity = 1 }: PaymentF
 
   const [phone, setPhone] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
-  const [statusCheckInterval, setStatusCheckInterval] = useState<NodeJS.Timeout | null>(null)
+  const [processingStartTime, setProcessingStartTime] = useState<number | null>(null)
+  const maxPollingTime = 120000 // 2 minutes in milliseconds
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Connect to WebSocket for real-time payment updates
+  const { isConnected } = usePaymentWebSocket(currentTransaction?.checkoutRequestID)
 
   // Calculate final price with discount
   const calculatePrice = () => {
@@ -61,6 +73,17 @@ export function PaymentForm({ isOpen, onClose, product, quantity = 1 }: PaymentF
     return cleaned
   }
 
+  // Reset payment state when component unmounts or dialog closes
+  const resetPaymentState = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setIsProcessing(false)
+    setProcessingStartTime(null)
+    dispatch(setCurrentTransaction(null))
+  }
+
   // Handle payment initiation
   const handlePayment = () => {
     if (!phone) {
@@ -73,67 +96,59 @@ export function PaymentForm({ isOpen, onClose, product, quantity = 1 }: PaymentF
       return
     }
 
+    // Reset any previous state
+    resetPaymentState()
+
     const formattedPhone = formatPhoneNumber(phone)
 
     const paymentData = {
-      phone : formattedPhone,
+      phone: formattedPhone,
       amount: finalPrice,
       sellerId: product.sellerId,
       productId: product._id,
-      buyerId :userInfo.id,
+      buyerId: userInfo.id,
       shopName: product.shopName || "Online Store",
     }
 
     dispatch(initiateSTKPush(paymentData))
     setIsProcessing(true)
+    setProcessingStartTime(Date.now())
+
+    // Set a timeout to automatically stop processing after maxPollingTime
+    timeoutRef.current = setTimeout(() => {
+      if (isProcessing) {
+        setIsProcessing(false)
+        toast.error("Payment timed out. Please try again.")
+      }
+    }, maxPollingTime)
   }
-
-  // Check payment status periodically
-  useEffect(() => {
-    if (isProcessing && currentTransaction?.checkoutRequestID) {
-      // Clear any existing interval
-      if (statusCheckInterval) {
-        clearInterval(statusCheckInterval)
-      }
-
-      // Set up a new interval to check payment status every 5 seconds
-      const interval = setInterval(() => {
-        dispatch(checkPaymentStatus(currentTransaction.checkoutRequestID))
-      }, 5000)
-
-      setStatusCheckInterval(interval)
-    }
-
-    return () => {
-      if (statusCheckInterval) {
-        clearInterval(statusCheckInterval)
-      }
-    }
-  }, [isProcessing, currentTransaction, dispatch])
 
   // Handle transaction status changes
   useEffect(() => {
     if (currentTransaction) {
-      if (currentTransaction.status === "completed") {
-        if (statusCheckInterval) {
-          clearInterval(statusCheckInterval)
-          setStatusCheckInterval(null)
+      // Immediately stop processing if we have a definitive status
+      if (currentTransaction.status === "completed" || currentTransaction.status === "failed") {
+        // Clear the timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current)
+          timeoutRef.current = null
         }
+
+        // Update processing state
         setIsProcessing(false)
-        toast.success("Payment completed successfully!")
-        setTimeout(() => {
-          onClose()
-        }, 2000)
-      } else if (currentTransaction.status === "failed") {
-        if (statusCheckInterval) {
-          clearInterval(statusCheckInterval)
-          setStatusCheckInterval(null)
+
+        // Show appropriate toast
+        if (currentTransaction.status === "completed") {
+          toast.success("Payment completed successfully!")
+          setTimeout(() => {
+            onClose()
+          }, 2000)
+        } else if (currentTransaction.status === "failed") {
+          toast.error(`Payment failed: ${currentTransaction.resultDesc || "Please try again"}`)
         }
-        setIsProcessing(false)
-        toast.error(`Payment failed: ${currentTransaction.resultDesc || "Please try again"}`)
       }
     }
-  }, [currentTransaction, statusCheckInterval, onClose])
+  }, [currentTransaction, onClose])
 
   // Handle errors and success messages
   useEffect(() => {
@@ -147,8 +162,39 @@ export function PaymentForm({ isOpen, onClose, product, quantity = 1 }: PaymentF
     }
   }, [error, success])
 
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      resetPaymentState()
+    }
+  }, [])
+
+  // Force check status button
+  const handleForceStatusCheck = () => {
+    if (currentTransaction?.checkoutRequestID) {
+      if (currentTransaction.mpesaReceiptNumber) {
+        dispatch(
+          queryTransactionStatus({
+            transactionId: currentTransaction.mpesaReceiptNumber,
+          }),
+        )
+      } else {
+        dispatch(checkPaymentStatus(currentTransaction.checkoutRequestID))
+      }
+      toast.info("Checking payment status...")
+    }
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          resetPaymentState()
+          onClose()
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Complete Your Purchase</DialogTitle>
@@ -184,11 +230,44 @@ export function PaymentForm({ isOpen, onClose, product, quantity = 1 }: PaymentF
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isProcessing}>
-            Cancel
-          </Button>
-          <Button onClick={handlePayment} disabled={isProcessing || loading}>
+        <div className="mt-2">
+          <PaymentStatusIndicator
+            status={currentTransaction?.status || null}
+            isProcessing={isProcessing}
+            startTime={processingStartTime || undefined}
+          />
+
+          {/* WebSocket connection status */}
+          <div className="flex items-center justify-center mt-1">
+            <div className={`h-2 w-2 rounded-full mr-2 ${isConnected ? "bg-green-500" : "bg-red-500"}`}></div>
+            <span className="text-xs text-muted-foreground">
+              {isConnected ? "Real-time updates active" : "Connecting to payment service..."}
+            </span>
+          </div>
+        </div>
+
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => {
+                resetPaymentState()
+                onClose()
+              }}
+              disabled={loading}
+              className="flex-1 sm:flex-none"
+            >
+              Cancel
+            </Button>
+
+            {isProcessing && (
+              <Button variant="secondary" onClick={handleForceStatusCheck} className="flex-1 sm:flex-none">
+                Refresh Status
+              </Button>
+            )}
+          </div>
+
+          <Button onClick={handlePayment} disabled={isProcessing || loading} className="w-full sm:w-auto">
             {isProcessing || loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
