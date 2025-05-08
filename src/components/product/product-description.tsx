@@ -13,6 +13,7 @@ import { Button } from "../ui/button"
 import { messageClear, add_to_wishlist } from "@/store/reducers/cardReducer"
 import { PaymentForm } from "./payment-form"
 import { setCurrentTransaction } from "@/store/reducers/paymentReducer"
+import { resetPaymentProcess } from "@/store/reducers/paymentReducer"
 
 export function ProductDescription({ product }: { product: any }) {
   const dispatch = useDispatch<any>()
@@ -79,16 +80,16 @@ export function ProductDescription({ product }: { product: any }) {
   // Buy now handler
   const buyNow = () => {
     if (!product) return
-
+  
     if (!userInfo) {
       toast.error("Please login to make a purchase")
       router.push("/login")
       return
     }
-
-    // Reset any previous transaction
-    dispatch(setCurrentTransaction(null))
-
+  
+    // Reset any previous transaction and payment state
+    dispatch(resetPaymentProcess())
+  
     // Open payment modal
     setIsPaymentModalOpen(true)
   }
