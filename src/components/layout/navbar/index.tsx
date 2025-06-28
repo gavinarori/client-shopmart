@@ -60,7 +60,7 @@ export default function Header() {
   // Navigation items
   const navItems = [
     { title: "Home", path: "/" },
-    { title: "Shop", path: "/shops" },
+    { title: "Shop", path: "/over-counter" },
     { title: "Products", path: "/products" },
   ]
 
