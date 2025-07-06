@@ -11,13 +11,13 @@ export function FeatureSection() {
 
         <div className="max-w-2xl">
           <h1 className="text-3xl font-bold tracking-tight  sm:text-4xl md:text-5xl">
-          Your Ultimate Online Store.
+          Your Ultimate Sneaker Destination.
           </h1>
           <h2 className="mt-2 text-3xl font-bold tracking-tight  sm:text-4xl md:text-5xl">
-          Shop the Best Deals, Anytime, Anywhere.
+          Quality, Style & Trust Delivered.
           </h2>
           <p className="mt-6 text-lg leading-8 ">
-          Explore a vast collection of top-quality products at unbeatable prices. Enjoy a seamless shopping experience with fast delivery and secure payments.
+          Discover premium kicks from the latest drops to classic favorites. Enjoy secure pay-on-delivery, Nairobi same-day delivery, and unmatched customer service. Not just your plug, your fam ❤
           </p>
           <div className="mt-8">
             <Button
@@ -25,7 +25,7 @@ export function FeatureSection() {
               className="group inline-flex items-center gap-2 rounded-full  px-6 py-2 text-sm font-semibold   transition-colors"
             >
              <ShoppingCart className="h-4 w-4" />
-             Start Shopping
+             Shop the Vault
             </Button>
           </div>
         </div>
@@ -36,7 +36,7 @@ export function FeatureSection() {
         <img 
           className="absolute inset-0 w-full h-full  bg-transparent"
           src="/assests/feature.webp"
-          alt="Seamless customization with Once UI"
+          alt="Premium sneaker collection showcase"
           loading="lazy"
           decoding="async"
         />

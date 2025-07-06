@@ -19,9 +19,9 @@ export default function Home() {
    <CategoryGrid/>
    <main className="min-h-screen ">
       <div className="py-12 text-center">
-        <h1 className="text-4xl font-bold mb-4">Featured Products</h1>
+        <h1 className="text-4xl font-bold mb-4">Featured Kicks</h1>
         <p className="max-w-2xl mx-auto">
-          Check out our latest collection of premium products. Click on any item to see more details.
+          Check out our latest collection of premium sneakers. From streetwear to luxury kicks, we've got your style covered. Click on any item to see more details.
         </p>
       </div>
       <ThreeItemGrid />
