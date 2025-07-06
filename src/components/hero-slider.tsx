@@ -13,39 +13,38 @@ type SlideType = {
   subtitle: string
   buttonText: string
   buttonLink: string
-  image: string
+  image?: string
+  video?: string
   altText: string
 }
 
 const slides: SlideType[] = [
   {
     id: 1,
-    title: "Designed for comfort",
-    subtitle: "Experience our ergonomic furniture collection designed to support your lifestyle and well-being.",
+    title: "Welcome to Kicksvaultke",
+    subtitle: "We don't just sell shoes — we deliver quality, style & trust to every doorstep. Tap in. Rock with us. Be the vault.",
     buttonText: "Shop Now",
     buttonLink: "#",
-    image: "/assests/slide-1.jpg",
-    altText: "Ergonomic furniture collection",
+    video: "/assests/cinematic jordan.mp4",
+    altText: "Cinematic Jordan sneaker showcase",
   },
   {
     id: 2,
-    title: "Sustainable living",
-    subtitle:
-      "Our eco-friendly products are made with sustainable materials to help reduce your environmental footprint.",
-    buttonText: "Explore",
+    title: "PlayStation X Cactus",
+    subtitle: "Exclusive gaming meets streetwear! Limited edition PlayStation X Cactus t-shirts now available. Premium quality, bold designs, perfect for gamers and fashion enthusiasts alike.",
+    buttonText: "Shop PlayStation X Cactus",
     buttonLink: "#",
-    image: "/assests/slide-2.jpg",
-    altText: "Eco-friendly products",
+    video: "/assests/cactus ad.mp4",
+    altText: "PlayStation X Cactus t-shirt collection",
   },
   {
     id: 3,
-    title: "Something for everyone",
-    subtitle:
-      "Don't miss out on exclusive offers across our best-selling products. Shop today and save big on the items you love.",
-    buttonText: "Shop Now",
+    title: "Premium T-Shirt Collection",
+    subtitle: "From streetwear essentials to statement pieces, our t-shirt collection has you covered. Quality fabrics, trendy designs, and unbeatable comfort. Order now and elevate your style game!",
+    buttonText: "Shop T-Shirts",
     buttonLink: "#",
-    image: "/assests/slide-3.jpg",
-    altText: "Best-selling products",
+    image: "/assests/sidewalk-sale-retail-shop-shirts.jpg",
+    altText: "Premium t-shirt collection showcase",
   },
 ]
 
@@ -116,15 +115,26 @@ export default function HeroSlider({ autoplaySpeed = 5000, className }: HeroSlid
             currentSlide === index ? "opacity-100 z-10" : "opacity-0 z-0",
           )}
         >
-          {/* Background Image */}
+          {/* Background Media */}
           <div className="absolute inset-0">
-            <Image
-              src={slide.image || "/placeholder.svg"}
-              alt={slide.altText}
-              fill
-              priority={index === 0}
-              className="object-cover"
-            />
+            {slide.video ? (
+              <video
+                src={slide.video}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src={slide.image || "/placeholder.svg"}
+                alt={slide.altText}
+                fill
+                priority={index === 0}
+                className="object-cover"
+              />
+            )}
             {/* Dark overlay for better text readability */}
             <div className="absolute inset-0 bg-black/30" />
           </div>

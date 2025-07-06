@@ -80,7 +80,7 @@ export default function Header() {
           <div className="flex items-center">
           <Link href="/" className="mr-2 flex w-full items-center justify-center md:w-auto lg:mr-6">
             <LogoSquare />
-            <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">ShopMart</div>
+            <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">Kicksvaultke</div>
           </Link>
           </div>
 
@@ -231,7 +231,7 @@ export default function Header() {
                     <div className="flex items-center justify-between mb-4">
                       <Link href="/" onClick={() => setIsOpen(false)}>
                       <LogoSquare />
-                      <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">ShopMart</div>
+                      <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">Kicksvaultke</div>
                       </Link>
                       <SheetClose asChild>
                         <Button variant="ghost" size="icon">

@@ -30,7 +30,7 @@ export function Footer(){
 
         <li>
           <a
-            href="#"
+            href="https://instagram.com/kicksvaultke"
             rel="noreferrer"
             target="_blank"
             className=" transition hover:opacity-75"
@@ -112,23 +112,23 @@ export function Footer(){
 
         <ul className="mt-6 space-y-4 text-sm">
           <li>
-            <a href="#" className=" transition hover:opacity-75"> 1on1 Coaching </a>
+            <a href="#" className=" transition hover:opacity-75"> Pay on Delivery </a>
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> Company Review </a>
+            <a href="#" className=" transition hover:opacity-75"> Same-Day Delivery </a>
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> Accounts Review </a>
+            <a href="#" className=" transition hover:opacity-75"> Authentic Kicks </a>
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> HR Consulting </a>
+            <a href="#" className=" transition hover:opacity-75"> Size Exchange </a>
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> SEO Optimisation </a>
+            <a href="#" className=" transition hover:opacity-75"> Customer Support </a>
           </li>
         </ul>
       </div>
@@ -138,15 +138,15 @@ export function Footer(){
 
         <ul className="mt-6 space-y-4 text-sm">
           <li>
-            <a href="#" className=" transition hover:opacity-75"> About </a>
+            <a href="#" className=" transition hover:opacity-75"> About Kicksvaultke </a>
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> Meet the Team </a>
+            <a href="#" className=" transition hover:opacity-75"> Our Story </a>
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> Accounts Review </a>
+            <a href="#" className=" transition hover:opacity-75"> Latest Drops </a>
           </li>
         </ul>
       </div>
@@ -156,15 +156,15 @@ export function Footer(){
 
         <ul className="mt-6 space-y-4 text-sm">
           <li>
-            <a href="#" className=" transition hover:opacity-75"> Contact </a>
+            <a href="#" className=" transition hover:opacity-75"> Contact Us </a>
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> FAQs </a>
+            <a href="#" className=" transition hover:opacity-75"> Size Guide </a>
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> Live Chat </a>
+            <a href="#" className=" transition hover:opacity-75"> Track Order </a>
           </li>
         </ul>
       </div>
@@ -174,7 +174,7 @@ export function Footer(){
 
         <ul className="mt-6 space-y-4 text-sm">
           <li>
-            <a href="#" className=" transition hover:opacity-75"> Accessibility </a>
+            <a href="#" className=" transition hover:opacity-75"> Privacy Policy </a>
           </li>
 
           <li>
@@ -182,17 +182,22 @@ export function Footer(){
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> Refund Policy </a>
+            <a href="#" className=" transition hover:opacity-75"> Terms of Service </a>
           </li>
 
           <li>
-            <a href="#" className=" transition hover:opacity-75"> Hiring-3 Statistics </a>
+            <a href="#" className=" transition hover:opacity-75"> Shipping Info </a>
           </li>
         </ul>
       </div>
     </div>
 
-    <p className="text-xs ">&copy; 2022. Company Name. All rights reserved.</p>
+    <div className="text-center">
+      <p className="text-xs mb-2">&copy; 2024 Kicksvaultke. All rights reserved.</p>
+      <p className="text-xs text-gray-600">Thanks again for trusting the vault.</p>
+      <p className="text-xs text-gray-600">— Kicksvaultke — Not just your plug, your fam ❤</p>
+      <p className="text-xs text-gray-600 mt-2">@kicksvaultke</p>
+    </div>
   </div>
 </footer>
     )
