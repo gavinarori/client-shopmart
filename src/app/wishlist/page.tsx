@@ -49,7 +49,7 @@ export default function WishlistPage() {
           <p className="mb-6 text-center text-muted-foreground">
             Items added to your wishlist will appear here. Start exploring to add products you love!
           </p>
-          <Link href="/products">
+          <Link href="/over-counter">
             <Button>Browse Products</Button>
           </Link>
         </div>

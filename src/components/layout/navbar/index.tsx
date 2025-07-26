@@ -51,7 +51,7 @@ export default function Header() {
 
   const redirect_wishlist_page = () => {
     if (userInfo) {
-      router.push(`/dashboard/my-wishlist`)
+      router.push(`/wishlist`)
     } else {
       router.push(`/login`)
     }
@@ -185,7 +185,7 @@ export default function Header() {
                     <Link href="/dashboard">Dashboard</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard/my-wishlist">My Wishlist</Link>
+                    <Link href="/wishlist">My Wishlist</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard/orders">My Orders</Link>

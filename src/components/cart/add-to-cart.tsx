@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { add_to_card } from "@/store/reducers/cardReducer"
+import { add_to_card, get_card_products } from "@/store/reducers/cardReducer"
 
 export function AddToCart({
   variants,
@@ -46,7 +46,7 @@ export function AddToCart({
     })
   }
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!userInfo) {
       toast.error("Please login to add items to cart")
       router.push("/login")
@@ -63,19 +63,24 @@ export function AddToCart({
     // Use the original product ID from the database
     const productId = product.id || product._id
 
-    // Dispatch Redux action
-    dispatch(
-      add_to_card({
-        userId: userInfo.id,
-        quantity,
-        productId,
-        // Include variant information if available
-        ...(selectedVariant?.title && { variant: selectedVariant.title }),
-      }),
-    )
+    try {
+      // Dispatch Redux action
+      await dispatch(
+        add_to_card({
+          userId: userInfo.id,
+          quantity,
+          productId,
+          // Include variant information if available
+          ...(selectedVariant?.title && { variant: selectedVariant.title }),
+        })
+      ).unwrap()
 
-    // Show animation and reset
-    setTimeout(() => {
+      // Refresh cart data after successful addition
+      if (userInfo.id) {
+        dispatch(get_card_products(userInfo.id))
+      }
+
+      // Show animation and reset
       setAdding(false)
       setAdded(true)
 
@@ -83,7 +88,10 @@ export function AddToCart({
         setAdded(false)
         setQuantity(1)
       }, 2000)
-    }, 800)
+    } catch (error) {
+      setAdding(false)
+      console.error("Failed to add to cart:", error)
+    }
   }
 
   const isOutOfStock = !availableForSale || stock <= 0 || (selectedVariant && !selectedVariant.availableForSale)

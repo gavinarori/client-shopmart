@@ -163,6 +163,7 @@ export const cardReducer = createSlice({
       .addCase(add_to_card.fulfilled, (state, action: PayloadAction<ApiResponse>) => {
         state.successMessage = action.payload.message ?? '';
         state.card_product_count += 1;
+        // Don't automatically refresh here - let the component handle it
       })
       .addCase(add_to_card.rejected, (state, action: PayloadAction<any>) => {
         state.errorMessage = action.payload?.error ?? 'Something went wrong';
