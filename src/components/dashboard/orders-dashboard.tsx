@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -437,7 +437,7 @@ function OrderCard({
   order: any
   onView: (order: any) => void
   onContact: (sellerId: string) => void
-  getStatusIcon: (status: string) => JSX.Element
+  getStatusIcon: (status: string) => React.ReactElement
   getStatusColor: (status: string) => string
 }) {
   return (
